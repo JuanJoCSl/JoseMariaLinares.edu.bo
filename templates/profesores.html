@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫José María Linares</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            color: #004080;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, #004080, #f0ad4e);
+            border-radius: 10px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #004080;
+            margin: 50px 0 30px;
+            padding-left: 15px;
+            border-left: 6px solid #f0ad4e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 12px;
+            color: #f0ad4e;
+            font-size: 1.5rem;
+        }
+        
+        .staff-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .staff-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .staff-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .staff-header {
+            background: linear-gradient(135deg, #004080 0%, #0066cc 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .staff-photo-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .staff-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .staff-card:hover .staff-photo {
+            transform: scale(1.1);
+        }
+        
+        .staff-name {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+        
+        .staff-position {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+        
+        .staff-info {
+            padding: 25px 20px;
+            flex-grow: 1;
+        }
+        
+        .staff-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .staff-detail:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .staff-detail i {
+            width: 30px;
+            height: 30px;
+            background: #004080;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .staff-detail-content {
+            flex-grow: 1;
+        }
+        
+        .staff-detail-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        
+        .staff-detail-content strong {
+            color: #004080;
+            font-weight: 600;
+        }
+        
+        .contact-note {
+            text-align: center;
+            margin-top: 40px;
+            padding: 15px;
+            background: #e6f7ff;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #004080;
+            border-left: 4px solid #004080;
+        }
+        
+        .department-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: #f0ad4e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 25px;
+            }
+            
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            .staff-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
+	<div class="rowq">
+        <h1>José María Linares</h1>
+        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+	</div>
+    </header>
+<main>
+    <h2>🧑‍🏫 Conoce a Nuestro Valioso Equipo Docente</h2>
+
+        <h3 class="section-title"><i class="fas fa-user-tie"></i> Dirección de la Unidad Educativa</h3>
+        <div class="staff-container">
+            <div class="staff-card">
+                <div class="staff-header">
+                    <div class="staff-photo-container">
+                        <img src="../img/direc.avif" alt="Foto del Director Silviano Aucachi" class="staff-photo">
+                    </div>
+                    <h3 class="staff-name">Director Silviano Aucachi</h3>
+                    <p class="staff-position">Director General</p>
+                </div>
+                <div class="staff-info">
+                    <div class="staff-detail">
+                        <i class="fas fa-briefcase"></i>
+                        <div class="staff-detail-content">
+                            <p>Cargo: <strong>Director General</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-phone"></i>
+                        <div class="staff-detail-content">
+                            <p>Número de Teléfono: <strong>(123) 456-7890</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-envelope"></i>
+                        <div class="staff-detail-content">
+                            <p>Email: <strong>director@jmlinares.edu</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Comunicación y Lenguaje</h3>
+        <div class="staff-container">
+            <div class="staff-card">
+                <div class="department-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="staff-header">
+                    <div class="staff-photo-container">
+                        <img src="../img/adolia.avif" alt="Foto de la Prof. Adolia Pinto" class="staff-photo">
+                    </div>
+                    <h3 class="staff-name">Prof. Adolia Pinto</h3>
+                    <p class="staff-position">Lengua Castellana y Literatura</p>
+                </div>
+                <div class="staff-info">
+                    <div class="staff-detail">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div class="staff-detail-content">
+                            <p>Especialidad: <strong>Lengua Castellana y Literatura</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-phone"></i>
+                        <div class="staff-detail-content">
+                            <p>Número de Teléfono: <strong>(123) 456-7891</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-envelope"></i>
+                        <div class="staff-detail-content">
+                            <p>Email: <strong>apinto@jmlinares.edu</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="staff-card">
+                <div class="department-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="staff-header">
+                    <div class="staff-photo-container">
+                        <img src="../img/blanca.avif" alt="Foto de la Prof. Blanca" class="staff-photo">
+                    </div>
+                    <h3 class="staff-name">Prof. Blanca [Apellido]</h3>
+                    <p class="staff-position">Idioma Extranjero (Inglés)</p>
+                </div>
+                <div class="staff-info">
+                    <div class="staff-detail">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div class="staff-detail-content">
+                            <p>Especialidad: <strong>Idioma Extranjero (Inglés)</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-phone"></i>
+                        <div class="staff-detail-content">
+                            <p>Número de Teléfono: <strong>(123) 456-7892</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-envelope"></i>
+                        <div class="staff-detail-content">
+                            <p>Email: <strong>blanca@jmlinares.edu</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="staff-card">
+                <div class="department-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="staff-header">
+                    <div class="staff-photo-container">
+                        <img src="../img/tania.avif" alt="Foto de la Prof. Tania" class="staff-photo">
+                    </div>
+                    <h3 class="staff-name">Prof. Tania [Apellido]</h3>
+                    <p class="staff-position">Comunicación y Lenguaje</p>
+                </div>
+                <div class="staff-info">
+                    <div class="staff-detail">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div class="staff-detail-content">
+                            <p>Especialidad: <strong>Comunicación y Lenguaje</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-phone"></i>
+                        <div class="staff-detail-content">
+                            <p>Número de Teléfono: <strong>(123) 456-7893</strong></p>
+                        </div>
+                    </div>
+                    <div class="staff-detail">
+                        <i class="fas fa-envelope"></i>
+                        <div class="staff-detail-content">
+                            <p>Email: <strong>tania@jmlinares.edu</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-note">
+            <i class="fas fa-info-circle"></i> Para ver la lista completa de docentes, por favor, contacte a la secretaría.
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    <script>
+        // Añadir efecto de aparición suave al hacer scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Configurar elementos para animación
+            const animatedElements = document.querySelectorAll('.staff-card');
+            animatedElements.forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

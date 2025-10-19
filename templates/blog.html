@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫José María Linares</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            color: #004080;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, #004080, #f0ad4e);
+            border-radius: 10px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #004080;
+            margin: 50px 0 25px;
+            padding-left: 15px;
+            border-left: 6px solid #f0ad4e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 12px;
+            color: #f0ad4e;
+            font-size: 1.5rem;
+        }
+        
+        /* --- Estilos de Comentarios --- */
+        .comments-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 25px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        
+        .comment-box {
+            background: linear-gradient(135deg, #e6f7ff 0%, #c3e6ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 64, 128, 0.15);
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .comment-box:hover {
+            transform: translateY(-5px);
+        }
+        
+        .comment-box:before {
+            content: '"';
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 5rem;
+            color: rgba(0, 64, 128, 0.1);
+            font-family: Georgia, serif;
+        }
+        
+        .comment-box p {
+            font-style: italic;
+            color: #333;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+            padding: 10px 0;
+        }
+        
+        .comment-author {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            color: #004080;
+            font-weight: 600;
+        }
+        
+        .comment-author i {
+            margin-right: 8px;
+            color: #f0ad4e;
+        }
+        
+        /* --- Estilos de Blog Estudiantil --- */
+        .blog-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .blog-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .blog-card-img {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .blog-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .blog-card:hover .blog-card-img img {
+            transform: scale(1.1);
+        }
+        
+        .blog-card-category {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0ad4e;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card-content h3 {
+            font-size: 1.4rem;
+            color: #004080;
+            margin-bottom: 10px;
+        }
+        
+        .card-content p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .read-more {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #004080;
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .read-more:hover {
+            background: #f0ad4e;
+            transform: translateX(5px);
+        }
+        
+        /* Decoración adicional */
+        .decoration {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .decoration i {
+            font-size: 2rem;
+            color: #f0ad4e;
+            margin: 0 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comments-container {
+                flex-direction: column;
+            }
+            
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            .blog-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
+	<div class="rowq">
+        <h1>José María Linares</h1>
+        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+	</div>
+    </header>
+
+    <main>
+	<h2>📣 Voces Estudiantiles (BLOG)</h2>
+	<h3 class="section-title"><i class="fas fa-pencil-alt"></i> Blog Estudiantil: Nuestros Talentos</h3>
+        <div class="blog-container">
+            <div class="blog-card">
+                <div class="blog-card-img">
+                    <img src="../img/ejercicio.avif" alt="Torneo deportivo">
+                    <div class="blog-card-category">Deportes</div>
+                </div>
+                <div class="card-content">
+                    <h3>¡Campeones del Torneo!</h3>
+                    <p>Resumen de la emocionante final de fútbol sala donde nuestros estudiantes demostraron su talento y trabajo en equipo.</p>
+                    <a href="#" class="read-more">Leer más</a>
+                </div>
+            </div>
+
+            <div class="blog-card">
+                <div class="blog-card-img">
+                    <img src="../img/ciencia.avif" alt="Feria científica">
+                    <div class="blog-card-category">Ciencia</div>
+                </div>
+                <div class="card-content">
+                    <h3>Feria de Ciencias 2025</h3>
+                    <p>Los proyectos más innovadores de este año escolar que demuestran la creatividad y conocimiento científico de nuestros alumnos.</p>
+                    <a href="#" class="read-more">Leer más</a>
+                </div>
+            </div>
+
+            <div class="blog-card">
+                <div class="blog-card-img">
+                    <img src="../img/musica.avif" alt="Banda musical">
+                    <div class="blog-card-category">Música</div>
+                </div>
+                <div class="card-content">
+                    <h3>Nuestra Gran Banda</h3>
+                    <p>Conozca a los músicos que nos representan con orgullo en cada evento y celebración de nuestra comunidad educativa.</p>
+                    <a href="#" class="read-more">Leer más</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    <script>
+        // Añadir efecto de aparición suave al hacer scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Configurar elementos para animación
+            const animatedElements = document.querySelectorAll('.comment-box, .blog-card');
+            animatedElements.forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
