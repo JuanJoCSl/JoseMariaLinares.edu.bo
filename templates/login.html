@@ -400,12 +400,12 @@
                 }
                 
                 // Si es válido, simular inicio de sesión
-                if (isValid) {
+                if (isValid && usernameInput.value === "anais123" && passwordInput.value === "marcasalazar2025") {
                     // Aquí normalmente enviaríamos los datos al servidor
                     // Por ahora, solo mostraremos un mensaje de éxito
                     alert('¡Inicio de sesión exitoso! Bienvenido a José María Linares');
                     // Redirigir a la página principal después del login
-                    // window.location.href = 'index.html';
+                    window.location.href = 'admin.html';
                 }
             });
             

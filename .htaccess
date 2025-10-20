@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Allow normal access to the base admin page
+# (no restriction for /templates/admin.html)
+RewriteCond %{REQUEST_URI} ^/templates/admin\.html$ [NC]
+
+# Restrict any other files that start with "admin." (e.g. admin.blog.html, admin.comentarios.html)
+RewriteCond %{REQUEST_URI} ^/templates/admin\..+\.html$ [NC]
+# Allow only when the request comes from /templates/admin.html (Referer contains that path)
+RewriteCond %{HTTP_REFERER} !/templates/admin\.html [NC]
+# Otherwise deny access
+RewriteRule .* - [F]
