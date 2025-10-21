@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫José María Linares - Deportes Admin</title>
+    <link rel="stylesheet" href="../css/adminstyles.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        main {
+            padding: 30px;
+            max-width: 1200px;
+            margin: auto;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #004080;
+        }
+
+        .crud-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #004080;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: #004080;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #00264d;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #008040;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #006030;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #f0ad4e;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #ec971f;
+        }
+        
+        .toggle-form-btn {
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .connection-status {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .actividad {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-left: 6px solid #004080;
+            transition: transform 0.2s ease;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .actividad:hover {
+            transform: translateY(-5px);
+        }
+
+        .actividad p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .actividad img {
+            display: block;
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            margin: 10px auto;
+            border-radius: 8px;
+            border: 2px solid #004080;
+        }
+        
+        .actividad-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+        
+        .actividad-actions button {
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #004080;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .config-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .operation-loading {
+            display: inline-block;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const referrer = document.referrer;
+        if (!referrer.includes('admin.html')) {
+            window.location.href = '../acceso-denegado.html';
+        }
+    </script>
+    
+    <header>
+        <div class="row"><img src="../img/icono.jpg" width="100px"></div>
+        <div class="rowq">
+            <h1>José María Linares</h1>
+            <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+        </div>
+    </header>
+
+    <main id="app">
+        <h2>⚽ Actividad Deportiva - Admin</h2>
+        
+        <div class="config-info">
+            <strong>Configuración Render.com:</strong> 
+            <span v-if="apiConfig.configured">✅ Conectado a: {{ apiConfig.url }}</span>
+            <span v-else>❌ Configura la URL de tu API en Render.com</span>
+        </div>
+        
+        <div class="connection-status" :class="connectionStatusClass">
+            {{ connectionStatusText }}
+        </div>
+        
+        <div v-if="alert.message" :class="['alert', alert.type === 'success' ? 'alert-success' : alert.type === 'warning' ? 'alert-warning' : 'alert-danger']">
+            {{ alert.message }}
+        </div>
+        
+        <button @click="toggleForm" class="btn toggle-form-btn" :class="showForm ? 'btn-secondary' : 'btn-primary'">
+            {{ showForm ? 'Cancelar' : 'Agregar Nueva Actividad Deportiva' }}
+        </button>
+        
+        <div v-if="showForm" class="crud-container">
+            <h3>{{ editingActivity ? 'Editar Actividad' : 'Nueva Actividad Deportiva' }}</h3>
+            
+            <div class="form-group">
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" class="form-control" v-model="currentActivity.titulo" placeholder="Ej: Entrenamientos de Básquet y Vóley">
+            </div>
+            
+            <div class="form-group">
+                <label for="contenido">Descripción:</label>
+                <textarea id="contenido" class="form-control" v-model="currentActivity.contenido" placeholder="Describe la actividad deportiva..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="imagen">URL de la imagen:</label>
+                <input type="text" id="imagen" class="form-control" v-model="currentActivity.imagen" placeholder="Ej: ../img/depo.png">
+                <small>Por ejemplo: ../img/depo.png o https://tu-app.render.com/images/foto.jpg</small>
+                
+                <div v-if="currentActivity.imagen">
+                    <p>Vista previa:</p>
+                    <img :src="currentActivity.imagen" alt="Vista previa" class="image-preview" @error="handleImageError">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" class="form-control" v-model="currentActivity.fecha">
+            </div>
+            
+            <div>
+                <button v-if="editingActivity" @click="updateActivity" class="btn btn-success" :disabled="operationLoading">
+                    {{ operationLoading ? 'Actualizando...' : 'Actualizar Actividad' }}
+                </button>
+                <button v-else @click="addActivity" class="btn btn-primary" :disabled="operationLoading">
+                    {{ operationLoading ? 'Agregando...' : 'Agregar Actividad' }}
+                </button>
+                <button @click="resetForm" class="btn btn-secondary" :disabled="operationLoading">
+                    Limpiar Formulario
+                </button>
+            </div>
+        </div>
+        
+        <div v-if="loading && !showForm" class="loading">
+            <p>Cargando actividades deportivas...</p>
+        </div>
+        
+        <div v-else-if="activities.length > 0">
+            <div v-for="activity in activities" :key="activity.id" class="actividad">
+                <h3>{{ activity.titulo }}</h3>
+                <p>{{ activity.contenido }}</p>
+                
+                <div v-if="activity.imagen">
+                    <img :src="activity.imagen" :alt="activity.titulo" @error="handleImageError">
+                </div>
+                
+                <p><small><strong>Fecha:</strong> {{ formatDate(activity.fecha) }}</small></p>
+                <p><small><strong>ID:</strong> {{ activity.id }} | <strong>Creado:</strong> {{ formatDateTime(activity.created_at) }}</small></p>
+                
+                <div class="actividad-actions">
+                    <button @click="editActivity(activity)" class="btn btn-warning" :disabled="operationLoading">Editar</button>
+                    <button @click="deleteActivity(activity.id)" class="btn btn-danger" :disabled="operationLoading">Eliminar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div v-else class="empty-state">
+            <p>No hay actividades deportivas disponibles. ¡Agrega la primera!</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button @click="testConnection" class="btn btn-secondary">
+                Probar Conexión con Render.com
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    
+    <script>
+      const RENDER_API_URL = 'https://josemarialinares-api.onrender.com';
+      
+      new Vue({
+        el: '#app',
+        data: {
+          showForm: false,
+          editingActivity: null,
+          loading: false,
+          operationLoading: false,
+          connectionStatus: 'checking',
+          alert: { message: '', type: 'success' },
+          apiConfig: {
+            url: RENDER_API_URL,
+            configured: RENDER_API_URL !== 'https://tu-api-comunicados.onrender.com'
+          },
+          currentActivity: {
+            titulo: '',
+            contenido: '',
+            imagen: '',
+            fecha: new Date().toISOString().split('T')[0]
+          },
+          activities: []
+        },
+        computed: {
+          connectionStatusClass() {
+            return {
+              'status-connected': this.connectionStatus === 'connected',
+              'status-disconnected': this.connectionStatus === 'error',
+              'status-loading': this.connectionStatus === 'checking'
+            };
+          },
+          connectionStatusText() {
+            switch(this.connectionStatus) {
+              case 'connected': return '✅ Conectado a Render.com';
+              case 'error': return '❌ Error de conexión con Render.com';
+              case 'checking': return '🔄 Verificando conexión...';
+              default: return 'Estado desconocido';
+            }
+          }
+        },
+        mounted() {
+          this.checkConnection();
+          this.fetchActivities();
+        },
+        methods: {
+          async checkConnection() {
+            this.connectionStatus = 'checking';
+            try {
+              const response = await axios.get(`${RENDER_API_URL}/health`, { timeout: 5000 });
+              this.connectionStatus = response.status === 200 ? 'connected' : 'error';
+            } catch (error) {
+              console.error('Error de conexión:', error);
+              this.connectionStatus = 'error';
+            }
+          },
+          
+          async testConnection() {
+            await this.checkConnection();
+            if (this.connectionStatus === 'connected') {
+              this.showAlert('✅ Conexión exitosa con Render.com', 'success');
+            } else {
+              this.showAlert('❌ No se pudo conectar. Verifica la URL y que el servicio esté activo.', 'danger');
+            }
+          },
+          
+          async fetchActivities() {
+            this.loading = true;
+            try {
+              // Verificar health primero
+              await axios.get(`${RENDER_API_URL}/health`, { timeout: 5000 });
+              
+              const response = await axios.get(`${RENDER_API_URL}/api/deportes`);
+              if (response.data && Array.isArray(response.data)) {
+                this.activities = response.data;
+                this.showAlert(`${response.data.length} actividades cargadas desde Render.com`, 'success');
+              } else {
+                throw new Error('Formato de respuesta inválido');
+              }
+            } catch (error) {
+              console.error('Error al cargar actividades:', error);
+              let errorMessage = 'Error al cargar las actividades';
+              
+              if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor está tardando en responder';
+              } else if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} ${error.response.statusText}`;
+              } else if (error.request) {
+                errorMessage = 'No se pudo conectar con el servidor';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+              this.loadExampleData();
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          loadExampleData() {
+            this.activities = [
+              {
+                id: 1,
+                titulo: 'Entrenamientos de Básquet y Vóley',
+                contenido: 'Se convoca a los estudiantes del equipo de Básquet y Vóley a los entrenamientos con los siguientes horarios: Lunes y Miércoles de 15:00 a 17:00 horas.',
+                imagen: '../img/depo.png',
+                fecha: '2025-10-20',
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                titulo: 'Torneo Interescolar de Fútbol',
+                contenido: 'Participaremos en el torneo interescolar de fútbol que se llevará a cabo el próximo mes. ¡Vamos Linares!',
+                imagen: '../img/depo.png',
+                fecha: '2025-10-25',
+                created_at: new Date().toISOString()
+              }
+            ];
+            this.showAlert('Usando datos de ejemplo - Verifica la conexión con el servidor', 'warning');
+          },
+          
+          toggleForm() {
+            this.showForm = !this.showForm;
+            if (!this.showForm) this.resetForm();
+          },
+          
+          resetForm() {
+            this.currentActivity = {
+              titulo: '',
+              contenido: '',
+              imagen: '',
+              fecha: new Date().toISOString().split('T')[0]
+            };
+            this.editingActivity = null;
+          },
+          
+          async addActivity() {
+            if (!this.currentActivity.titulo || !this.currentActivity.contenido) {
+              this.showAlert('El título y descripción son obligatorios', 'danger');
+              return;
+            }
+            
+            if (!this.currentActivity.fecha) {
+              this.showAlert('La fecha es obligatoria', 'danger');
+              return;
+            }
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/deportes
+              const response = await axios.post(`${RENDER_API_URL}/api/deportes`, this.currentActivity);
+              this.activities.push(response.data);
+              this.showAlert('Actividad agregada correctamente en Render.com', 'success');
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al agregar actividad:', error);
+              let errorMessage = 'Error al agregar la actividad';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          editActivity(activity) {
+            this.currentActivity = {...activity};
+            this.editingActivity = activity;
+            this.showForm = true;
+          },
+          
+          async updateActivity() {
+            if (!this.editingActivity) return;
+            
+            if (!this.currentActivity.titulo || !this.currentActivity.contenido) {
+              this.showAlert('El título y descripción son obligatorios', 'danger');
+              return;
+            }
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/deportes
+              const response = await axios.put(
+                `${RENDER_API_URL}/api/deportes/${this.editingActivity.id}`,
+                this.currentActivity
+              );
+              
+              const index = this.activities.findIndex(a => a.id === this.editingActivity.id);
+              if (index !== -1) {
+                this.activities.splice(index, 1, response.data);
+              }
+              
+              this.showAlert('Actividad actualizada correctamente en Render.com', 'success');
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al actualizar actividad:', error);
+              let errorMessage = 'Error al actualizar la actividad';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          async deleteActivity(id) {
+            if (!confirm('¿Está seguro de eliminar esta actividad?')) return;
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/deportes
+              await axios.delete(`${RENDER_API_URL}/api/deportes/${id}`);
+              this.activities = this.activities.filter(a => a.id !== id);
+              this.showAlert('Actividad eliminada correctamente de Render.com', 'success');
+            } catch (error) {
+              console.error('Error al eliminar actividad:', error);
+              let errorMessage = 'Error al eliminar la actividad';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          showAlert(message, type) {
+            this.alert = { message, type };
+            setTimeout(() => { this.alert.message = ''; }, 5000);
+          },
+          
+          formatDate(dateString) {
+            if (!dateString) return 'No especificada';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+          },
+          
+          formatDateTime(dateTimeString) {
+            if (!dateTimeString) return 'No disponible';
+            const options = { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            };
+            return new Date(dateTimeString).toLocaleDateString('es-ES', options);
+          },
+          
+          handleImageError(event) {
+            event.target.style.display = 'none';
+          }
+        }
+      });
+    </script>
+</body>
+</html>

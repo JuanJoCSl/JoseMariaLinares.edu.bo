@@ -3,77 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏫José María Linares</title>
+    <title>🏫José María Linares - Deportes</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        main {
+            padding: 30px;
+            max-width: 800px;
+            margin: auto;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #004080;
+        }
+
+        .actividad {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-left: 6px solid #004080;
+            transition: transform 0.2s ease;
+            margin-bottom: 25px;
+        }
+
+        .actividad:hover {
+            transform: translateY(-5px);
+        }
+
+        .actividad h3 {
+            color: #004080;
+            margin-bottom: 15px;
+        }
+
+        .actividad p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .actividad img {
+            display: block;
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            margin: 10px auto;
+            border-radius: 8px;
+            border: 2px solid #004080;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #004080;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .actividad-date {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .api-status {
+            padding: 10px;
+            margin: 10px 0 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
 </head>
 <body>
     <header>
-	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
-	<div class="rowq">
-        <h1>José María Linares</h1>
-        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
-	</div>
+        <div class="row"><img src="../img/icono.jpg" width="100px"></div>
+        <div class="rowq">
+            <h1>José María Linares</h1>
+            <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+        </div>
     </header>
 
-    <main>
-  <style>
-    main {
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
-      font-family: "Segoe UI", Arial, sans-serif;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      color: #004080;
-    }
-
-    .actividad {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      border-left: 6px solid #004080;
-      transition: transform 0.2s ease;
-    }
-
-    .actividad:hover {
-      transform: translateY(-5px);
-    }
-
-    .actividad p {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .actividad img {
-      display: block;
-      width: 100%;
-      max-width: 500px;
-      height: auto;
-      margin: 10px auto;
-      border-radius: 8px;
-      border: 2px solid #004080;
-    }
-  </style>
-
-  <h2>⚽ Actividad Deportiva</h2>
-
-  <div class="actividad">
-    <p>
-      Se convoca a los estudiantes del equipo de <b>Básquet</b> y <b>Vóley</b> a los entrenamientos con los siguientes horarios.
-    </p>
-    <img src="../img/depo.png" alt="Imagen de actividad deportiva">
-  </div>
-</main>
-
+    <main id="app">
+        <h2>⚽ Actividad Deportiva</h2>
+        
+        <div v-if="apiStatus" class="api-status" :class="apiStatusClass">
+            {{ apiStatus }}
+        </div>
+        
+        <div v-if="loading" class="loading">
+            <p>Cargando actividades deportivas...</p>
+        </div>
+        
+        <div v-else-if="error" class="error">
+            <p>{{ error }}</p>
+        </div>
+        
+        <div v-else-if="activities.length === 0" class="empty-state">
+            <p>No hay actividades deportivas disponibles en este momento.</p>
+        </div>
+        
+        <transition-group name="fade" tag="div" v-else>
+            <div v-for="activity in activities" :key="activity.id" class="actividad">
+                <h3 v-if="activity.titulo">{{ activity.titulo }}</h3>
+                <p>{{ activity.contenido }}</p>
+                
+                <div v-if="activity.imagen">
+                    <img :src="activity.imagen" :alt="activity.titulo || 'Actividad deportiva'" @error="handleImageError">
+                </div>
+                
+                <div class="actividad-date" v-if="activity.fecha">
+                    {{ formatDate(activity.fecha) }}
+                </div>
+            </div>
+        </transition-group>
+    </main>
 
     <footer>
         <p>&copy; 2025 Unidad Educativa José María Linares</p>
     </footer>
+    
+    <script>
+      const API_BASE_URL = 'https://josemarialinares-api.onrender.com';
+      
+      new Vue({
+        el: '#app',
+        data: {
+          loading: true,
+          error: null,
+          apiStatus: '',
+          activities: []
+        },
+        computed: {
+          apiStatusClass() {
+            if (this.apiStatus.includes('éxito') || this.apiStatus.includes('cargad')) {
+              return 'status-success';
+            }
+            return 'status-warning';
+          }
+        },
+        mounted() {
+          this.fetchActivities();
+          setInterval(() => {
+            if (!this.loading) this.fetchActivities();
+          }, 300000);
+        },
+        methods: {
+          async fetchActivities() {
+            this.loading = true;
+            this.error = null;
+            
+            try {
+              const response = await axios.get(`${API_BASE_URL}/api/deportes`, { timeout: 15000 });
+              
+              if (response.data && Array.isArray(response.data)) {
+                this.activities = response.data;
+                this.apiStatus = `✅ ${response.data.length} actividades cargadas`;
+              } else {
+                throw new Error('Formato de respuesta inválido');
+              }
+              
+            } catch (apiError) {
+              console.error('Error al cargar:', apiError);
+              
+              if (apiError.code === 'ECONNABORTED') {
+                this.error = "Tiempo agotado. El servidor puede estar iniciando.";
+                this.apiStatus = '⏰ Timeout';
+              } else if (apiError.response) {
+                this.error = `Error del servidor: ${apiError.response.status}`;
+                this.apiStatus = `❌ Error ${apiError.response.status}`;
+              } else if (apiError.request) {
+                this.error = "No se pudo conectar con el servidor.";
+                this.apiStatus = '🌐 Error de Red';
+              } else {
+                this.error = "Error inesperado.";
+                this.apiStatus = '⚙️ Error';
+              }
+              
+              this.loadExampleData();
+              
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          formatDate(dateString) {
+            if (!dateString) return '';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            try {
+              const date = new Date(dateString);
+              return 'Publicado el ' + date.toLocaleDateString('es-ES', options);
+            } catch (e) {
+              return dateString;
+            }
+          },
+          
+          handleImageError(event) {
+            console.warn('Error cargando imagen:', event.target.src);
+            event.target.style.display = 'none';
+          }
+        }
+      });
+    </script>
 </body>
 </html>

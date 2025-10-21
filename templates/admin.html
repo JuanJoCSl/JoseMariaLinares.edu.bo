@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="../css/adminstyles.css">
 </head>
 <body>
+    
+    <script>
+        // Verificar si viene de admin.html
+        const referrer = document.referrer;
+        if (!referrer.includes('login.html')) {
+            // Redirigir a página de error o login
+            window.location.href = '../index.html';
+        }
+    </script>
     <header>
         <div class="row"><img src="../img/icono.jpg" width="100px" ></div>
         <div class="rowq">
@@ -17,14 +26,15 @@
 
         <main>
             <center><h2>Área Administrativa</h2></center><br>
-            <section class="grid">
-            <a href="admin.comunicados.html" class="box">📢 <br> Comunicados de última hora</a>
-            <a href="admin.deportes.html" class="box">⚽ <br> Actividad Deportiva</a>
+        <section class="grid">
+            <a href="admin.comunicados1.html" class="box">📢 <br> Comunicados de última hora</a>
+            <a href="admin.deportes1.html" class="box">⚽ <br> Actividad Deportiva</a>
             
         </section>
         <section class="grid">
-            <a href="admin.comentarios.html" class="box">💬 <br> Comentarios</a>
-            <a href="admin.blog.html" class="box">📝 <br> Blog Estudiantil</a>
+            <a href="admin.comentarios1.html" class="box">💬 <br> Comentarios</a>
+            <a href="admin.blog1.html" class="box">📝 <br> Blog Estudiantil</a>
+            <a href="admin.horarios1.html" class="box">📅 <br> Horarios</a>
         </section>
         </main>
 

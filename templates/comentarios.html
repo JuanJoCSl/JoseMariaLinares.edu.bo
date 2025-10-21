@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunidad y Voces Estudiantiles</title>
+    <title>🏫José María Linares - Comentarios</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        
         main {
             max-width: 1200px;
             margin: 40px auto;
@@ -54,7 +55,6 @@
             font-size: 1.5rem;
         }
         
-        /* --- Estilos de Comentarios --- */
         .comments-container {
             display: flex;
             justify-content: space-between;
@@ -111,104 +111,87 @@
             color: #f0ad4e;
         }
         
-        /* --- Estilos de Blog Estudiantil --- */
-        .blog-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            justify-content: center;
-        }
-        
-        .blog-card {
-            background: #ffffff;
-            border-radius: 15px;
-            overflow: hidden;
-            width: 100%;
-            max-width: 350px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .blog-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-        
-        .blog-card-img {
-            height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .blog-card-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .blog-card:hover .blog-card-img img {
-            transform: scale(1.1);
-        }
-        
-        .blog-card-category {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #f0ad4e;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .card-content {
-            padding: 20px;
-        }
-        
-        .card-content h3 {
-            font-size: 1.4rem;
+        .loading {
+            text-align: center;
+            padding: 40px;
             color: #004080;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
         }
         
-        .card-content p {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 20px;
+        .error {
+            text-align: center;
+            padding: 20px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
         }
         
-        .read-more {
-            display: inline-block;
-            padding: 8px 20px;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .api-status {
+            padding: 10px;
+            margin: 10px 0 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+        
+        .retry-btn {
+            padding: 10px 20px;
             background: #004080;
             color: white;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
         }
         
-        .read-more:hover {
-            background: #f0ad4e;
-            transform: translateX(5px);
+        .retry-btn:hover {
+            background: #00264d;
         }
         
-        /* Decoración adicional */
-        .decoration {
-            text-align: center;
-            margin: 40px 0;
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            color: #6c757d;
         }
         
-        .decoration i {
-            font-size: 2rem;
-            color: #f0ad4e;
-            margin: 0 15px;
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
             .comments-container {
                 flex-direction: column;
@@ -217,65 +200,196 @@
             h2 {
                 font-size: 2.2rem;
             }
-            
-            .blog-card {
-                max-width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-
-    <header>
-	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
-	<div class="rowq">
-        <h1>José María Linares</h1>
-        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
-	</div>
-    </header>
-    <main>
+    <header>
+        <div class="row"><img src="../img/icono.jpg" width="100px"></div>
+        <div class="rowq">
+            <h1>José María Linares</h1>
+            <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+        </div>
+    </header>
+    
+    <main id="app">
         <h2>📣 Comunidad (Comentarios)</h2>
         
-        <h3 class="section-title"><i class="fas fa-comments"></i> Lo que dicen de nosotros...</h3>
-        <div class="comments-container">
-            <div class="comment-box">
-                <p>"El colegio José María Linares tiene una gran banda. La dedicación de los estudiantes y maestros es realmente admirable."</p>
-                <div class="comment-author">
-                    <i class="fas fa-user"></i> Padre de Familia
-                </div>
-            </div>
-            <div class="comment-box">
-                <p>"Los estudiantes del colegio son los mejores. Siempre demuestran valores y excelencia académica en cada actividad."</p>
-                <div class="comment-author">
-                    <i class="fas fa-user"></i> Exalumno
-                </div>
-            </div>
+        <!-- Información de depuración -->
+        <div v-if="showDebug" class="debug-info">
+            <strong>Información de Depuración:</strong><br>
+            URL Base: {{ apiBaseUrl }}<br>
+            Estado: {{ connectionStatus }}<br>
+            <button @click="toggleDebug" class="retry-btn" style="background: #6c757d; margin-top: 5px;">
+                Ocultar Info
+            </button>
         </div>
+        
+        <div v-if="apiStatus" class="api-status" :class="apiStatusClass">
+            {{ apiStatus }}
+        </div>
+        
+        <h3 class="section-title"><i class="fas fa-comments"></i> Lo que dicen de nosotros...</h3>
+        
+        <div v-if="loading" class="loading">
+            <p>Cargando comentarios...</p>
+        </div>
+        
+        <div v-else-if="error" class="error">
+            <p>{{ error }}</p>
+            <button @click="fetchComments" class="retry-btn">Reintentar Conexión</button>
+            <button @click="toggleDebug" class="retry-btn" style="background: #6c757d; margin-left: 10px;">
+                {{ showDebug ? 'Ocultar' : 'Mostrar' }} Info Técnica
+            </button>
+        </div>
+        
+        <div v-else-if="comments.length === 0" class="empty-state">
+            <p>No hay comentarios disponibles en este momento.</p>
+            <button @click="fetchComments" class="retry-btn">Reintentar</button>
+        </div>
+        
+        <transition-group name="fade" tag="div" class="comments-container" v-else>
+            <div v-for="comment in comments" :key="comment.id" class="comment-box">
+                <p>"{{ comment.contenido }}"</p>
+                <div class="comment-author">
+                    <i class="fas fa-user"></i> {{ comment.titulo }}
+                </div>
+            </div>
+        </transition-group>
     </main>
+    
     <footer>
         <p>&copy; 2025 Unidad Educativa José María Linares</p>
     </footer>
+    
     <script>
-        // Añadir efecto de aparición suave al hacer scroll
-        document.addEventListener('DOMContentLoaded', function() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, { threshold: 0.1 });
+      const API_BASE_URL = 'https://josemarialinares-api.onrender.com';
+      
+      new Vue({
+        el: '#app',
+        data: {
+          loading: true,
+          error: null,
+          showDebug: false,
+          apiStatus: '',
+          connectionStatus: 'Iniciando...',
+          apiBaseUrl: API_BASE_URL,
+          comments: []
+        },
+        computed: {
+          apiStatusClass() {
+            if (this.apiStatus.includes('éxito') || this.apiStatus.includes('cargad') || this.apiStatus.includes('OK')) {
+              return 'status-success';
+            } else if (this.apiStatus.includes('Error') || this.apiStatus.includes('falló')) {
+              return 'status-error';
+            }
+            return 'status-warning';
+          }
+        },
+        mounted() {
+          this.fetchComments();
+          // Recargar comentarios cada 5 minutos
+          setInterval(() => {
+            if (!this.loading) this.fetchComments();
+          }, 300000);
+        },
+        methods: {
+          async fetchComments() {
+            this.loading = true;
+            this.error = null;
+            this.connectionStatus = 'Conectando con el servidor...';
             
-            // Configurar elementos para animación
-            const animatedElements = document.querySelectorAll('.comment-box, .blog-card');
-            animatedElements.forEach(el => {
-                el.style.opacity = 0;
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                observer.observe(el);
-            });
-        });
+            try {
+              // Verificar primero el estado del servidor
+              try {
+                const healthResponse = await axios.get(`${API_BASE_URL}/health`, { 
+                  timeout: 10000 
+                });
+                if (healthResponse.data && healthResponse.data.status === 'ok') {
+                  this.connectionStatus = `Servidor conectado - ${healthResponse.data.message || 'OK'}`;
+                }
+              } catch (healthError) {
+                this.connectionStatus = 'Health check falló, continuando...';
+              }
+              
+              // Obtener los comentarios - ENDPOINT CORREGIDO: /api/comentarios
+              this.connectionStatus = 'Obteniendo comentarios...';
+              const response = await axios.get(`${API_BASE_URL}/api/comentarios`, { 
+                timeout: 15000 
+              });
+              
+              if (response.data && Array.isArray(response.data)) {
+                // Usar todos los comentarios sin filtrar - FILTRADO ELIMINADO
+                this.comments = response.data;
+                
+                this.apiStatus = `✅ ${this.comments.length} comentarios cargados desde la API`;
+                this.connectionStatus = `Comentarios cargados: ${this.comments.length} encontrados`;
+              } else {
+                throw new Error('Formato de respuesta inválido');
+              }
+              
+            } catch (apiError) {
+              console.error('Error al cargar comentarios:', apiError);
+              this.connectionStatus = `Error: ${apiError.message}`;
+              
+              if (apiError.code === 'ECONNABORTED') {
+                this.error = "Tiempo de espera agotado. El servidor puede estar iniciando.";
+                this.apiStatus = '⏰ Timeout - Servidor no respondió a tiempo';
+              } else if (apiError.response) {
+                this.error = `Error del servidor: ${apiError.response.status} ${apiError.response.statusText}`;
+                this.apiStatus = `❌ Error ${apiError.response.status}`;
+              } else if (apiError.request) {
+                this.error = "No se pudo conectar con el servidor.";
+                this.apiStatus = '🌐 Error de Red';
+              } else {
+                this.error = "Error inesperado en la configuración.";
+                this.apiStatus = '⚙️ Error de Configuración';
+              }
+              
+              // Cargar datos de ejemplo en caso de error
+              this.loadExampleData();
+              
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          loadExampleData() {
+            // Datos de ejemplo para cuando la API no esté disponible
+            this.comments = [
+              {
+                id: 1,
+                titulo: "Padre de Familia",
+                contenido: "El colegio José María Linares tiene una gran banda. La dedicación de los estudiantes y maestros es realmente admirable.",
+                fecha: "2025-10-18",
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                titulo: "Exalumno",
+                contenido: "Los estudiantes del colegio son los mejores. Siempre demuestran valores y excelencia académica en cada actividad.",
+                fecha: "2025-10-19",
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 3,
+                titulo: "Estudiante",
+                contenido: "Me encanta estudiar en este colegio. Los profesores son muy dedicados y las instalaciones son excelentes.",
+                fecha: "2025-10-20",
+                created_at: new Date().toISOString()
+              }
+            ];
+            
+            if (!this.apiStatus.includes('Error')) {
+              this.apiStatus = '⚠️ Usando datos de ejemplo - Verifica la conexión con el servidor';
+            }
+          },
+          
+          toggleDebug() {
+            this.showDebug = !this.showDebug;
+          }
+        }
+      });
     </script>
 </body>
 </html>

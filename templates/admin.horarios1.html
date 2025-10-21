@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫 José María Linares - Administrar Horarios</title>
+    <link rel="stylesheet" href="../css/adminstyles.css">
+    <!-- Vue.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- Axios CDN para peticiones HTTP -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+    main {
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #004080;
+    }
+
+    .horario-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-left: 6px solid #804000;
+      transition: transform 0.2s ease;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .horario-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .horario-card img {
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      margin: 10px auto;
+      border-radius: 8px;
+      border: 2px solid #804000;
+    }
+    
+    /* Estilos para el formulario de CRUD */
+    .crud-container {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #004080;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-right: 10px;
+    }
+    
+    .btn-primary {
+      background: #004080;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #00264d;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    
+    .btn-success {
+      background: #008040;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #006030;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .btn-warning {
+      background: #f0ad4e;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #ec971f;
+    }
+    
+    .horario-actions {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .horario-actions button {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .toggle-form-btn {
+      margin-bottom: 20px;
+      display: block;
+      width: 100%;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    
+    .alert-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
+    
+    .image-preview {
+      max-width: 200px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #004080;
+    }
+    
+    .connection-status {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    .status-connected {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status-disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-loading {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .config-info {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+    <!-- Script de verificación de acceso -->
+    <script>
+        // Verificar si viene de admin.html
+        const referrer = document.referrer;
+        if (!referrer.includes('admin.html')) {
+            // Redirigir a página de error o login
+            window.location.href = '../acceso-denegado.html';
+        }
+    </script>
+    
+    <header>
+	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
+	<div class="rowq">
+        <h1>José María Linares</h1>
+        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+	</div>
+    </header>
+
+    <main id="app">
+      <h2>📋 Administrar Horarios de Clases</h2>
+      
+      <!-- Información de configuración -->
+      <div class="config-info">
+        <strong>Configuración Render.com:</strong> 
+        <span v-if="apiConfig.configured">✅ Conectado a: {{ apiConfig.url }}</span>
+        <span v-else>❌ Configura la URL de tu API en Render.com</span>
+      </div>
+      
+      <!-- Estado de conexión -->
+      <div class="connection-status" :class="connectionStatusClass">
+        {{ connectionStatusText }}
+      </div>
+      
+      <!-- Alertas -->
+      <div v-if="alert.message" :class="['alert', alert.type === 'success' ? 'alert-success' : alert.type === 'warning' ? 'alert-warning' : 'alert-danger']">
+        {{ alert.message }}
+      </div>
+      
+      <!-- Botón para mostrar/ocultar formulario -->
+      <button @click="toggleForm" class="btn toggle-form-btn" :class="showForm ? 'btn-secondary' : 'btn-primary'">
+        {{ showForm ? 'Cancelar' : 'Agregar Nuevo Horario' }}
+      </button>
+      
+      <!-- Formulario para agregar/editar horarios -->
+      <div v-if="showForm" class="crud-container">
+        <h3>{{ editingHorario ? 'Editar Horario' : 'Nuevo Horario' }}</h3>
+        
+        <div class="form-group">
+          <label for="titulo">Título:</label>
+          <input type="text" id="titulo" class="form-control" v-model="currentHorario.titulo" placeholder="Ej: Horario General, Horario Lunes a Jueves, etc.">
+        </div>
+        
+        <div class="form-group">
+          <label for="imagen">URL de la imagen:</label>
+          <input type="text" id="imagen" class="form-control" v-model="currentHorario.imagen" placeholder="Ingrese la URL de la imagen del horario">
+          <small>Por ejemplo: ../img/horario_general.png o https://tu-app.render.com/images/horario.jpg</small>
+          
+          <!-- Vista previa de imagen -->
+          <div v-if="currentHorario.imagen">
+            <p>Vista previa:</p>
+            <img :src="currentHorario.imagen" alt="Vista previa" class="image-preview" @error="handleImageError">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="fecha">Fecha de vigencia:</label>
+          <input type="date" id="fecha" class="form-control" v-model="currentHorario.fecha">
+        </div>
+        
+        <div>
+          <button v-if="editingHorario" @click="updateHorario" class="btn btn-success" :disabled="loading">
+            {{ loading ? 'Actualizando...' : 'Actualizar Horario' }}
+          </button>
+          <button v-else @click="addHorario" class="btn btn-primary" :disabled="loading">
+            {{ loading ? 'Agregando...' : 'Agregar Horario' }}
+          </button>
+          <button @click="resetForm" class="btn btn-secondary" :disabled="loading">
+            Limpiar Formulario
+          </button>
+        </div>
+      </div>
+      
+      <!-- Lista de horarios -->
+      <div v-if="loading" class="loading">
+        <p>Cargando horarios...</p>
+      </div>
+      
+      <div v-else-if="horarios.length > 0">
+        <div v-for="horario in horarios" :key="horario.id" class="horario-card">
+          <div class="horario-actions">
+            <button @click="editHorario(horario)" class="btn btn-warning" :disabled="loading">Editar</button>
+            <button @click="deleteHorario(horario.id)" class="btn btn-danger" :disabled="loading">Eliminar</button>
+          </div>
+          
+          <h3>{{ horario.titulo }}</h3>
+          
+          <div v-if="horario.imagen">
+            <img :src="horario.imagen" :alt="horario.titulo" @error="handleImageError">
+          </div>
+          
+          <p><small><strong>Fecha de vigencia:</strong> {{ formatDate(horario.fecha) }}</small></p>
+          <p><small><strong>ID:</strong> {{ horario.id }} | <strong>Creado:</strong> {{ formatDateTime(horario.created_at) }}</small></p>
+        </div>
+      </div>
+      
+      <!-- Estado vacío -->
+      <div v-else class="empty-state">
+        <p>No hay horarios disponibles. ¡Agregue el primero!</p>
+      </div>
+
+      <!-- Botón para probar conexión -->
+      <div style="text-align: center; margin-top: 30px;">
+        <button @click="testConnection" class="btn btn-secondary">
+          Probar Conexión con Render.com
+        </button>
+      </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    
+    <script>
+      // Configuración para Render.com - REEMPLAZA CON TU URL
+      const RENDER_API_URL = 'http://127.0.0.1:5000'; // Cambia por tu URL de Render
+      
+      new Vue({
+        el: '#app',
+        data: {
+          showForm: false,
+          editingHorario: null,
+          loading: false,
+          connectionStatus: 'checking', // checking, connected, error
+          alert: {
+            message: '',
+            type: 'success'
+          },
+          apiConfig: {
+            url: RENDER_API_URL,
+            configured: RENDER_API_URL !== 'https://tu-api-comunicados.onrender.com'
+          },
+          currentHorario: {
+            titulo: '',
+            imagen: '',
+            fecha: new Date().toISOString().split('T')[0]
+          },
+          horarios: []
+        },
+        computed: {
+          connectionStatusClass() {
+            return {
+              'status-connected': this.connectionStatus === 'connected',
+              'status-disconnected': this.connectionStatus === 'error',
+              'status-loading': this.connectionStatus === 'checking'
+            };
+          },
+          connectionStatusText() {
+            switch(this.connectionStatus) {
+              case 'connected': return '✅ Conectado a Render.com';
+              case 'error': return '❌ Error de conexión con Render.com';
+              case 'checking': return '🔄 Verificando conexión...';
+              default: return 'Estado desconocido';
+            }
+          }
+        },
+        mounted() {
+          this.checkConnection();
+          this.fetchHorarios();
+        },
+        methods: {
+          // Verificar conexión con Render.com
+          async checkConnection() {
+            this.connectionStatus = 'checking';
+            try {
+              const response = await axios.get(`${RENDER_API_URL}/health`, { timeout: 5000 });
+              this.connectionStatus = response.status === 200 ? 'connected' : 'error';
+            } catch (error) {
+              console.error('Error de conexión con Render:', error);
+              this.connectionStatus = 'error';
+              if (error.code === 'ECONNABORTED') {
+                this.showAlert('Timeout: El servidor en Render.com está iniciando (puede tomar 1-2 minutos)', 'warning');
+              }
+            }
+          },
+
+          async testConnection() {
+            await this.checkConnection();
+            if (this.connectionStatus === 'connected') {
+              this.showAlert('✅ Conexión exitosa con Render.com', 'success');
+            } else {
+              this.showAlert('❌ No se pudo conectar con Render.com. Verifica la URL y que el servicio esté ejecutándose.', 'danger');
+            }
+          },
+          
+          // Obtener todos los horarios
+          async fetchHorarios() {
+            this.loading = true;
+            try {
+              const response = await axios.get(`${RENDER_API_URL}/api/horarios`);
+              this.horarios = response.data;
+              this.showAlert('Horarios cargados correctamente desde Render.com', 'success');
+            } catch (error) {
+              console.error('Error al cargar horarios:', error);
+              this.showAlert('Error al cargar los horarios desde Render.com', 'danger');
+              // Datos de ejemplo en caso de error
+              this.loadExampleData();
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          // Cargar datos de ejemplo si falla la conexión
+          loadExampleData() {
+            this.horarios = [
+              {
+                id: 1,
+                titulo: 'Horario General de Clases',
+                imagen: '../img/horario_general.png',
+                fecha: '2025-01-01',
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                titulo: 'Horario Lunes a Jueves',
+                imagen: '../img/horario_lun_jue.png',
+                fecha: '2025-01-01',
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 3,
+                titulo: 'Horario Viernes',
+                imagen: '../img/horario_viernes.png',
+                fecha: '2025-01-01',
+                created_at: new Date().toISOString()
+              }
+            ];
+            this.showAlert('Usando datos de ejemplo - Verifica la conexión con Render.com', 'warning');
+          },
+          
+          toggleForm() {
+            this.showForm = !this.showForm;
+            if (!this.showForm) {
+              this.resetForm();
+            }
+          },
+          
+          resetForm() {
+            this.currentHorario = {
+              titulo: '',
+              imagen: '',
+              fecha: new Date().toISOString().split('T')[0]
+            };
+            this.editingHorario = null;
+          },
+          
+          // Agregar nuevo horario
+          async addHorario() {
+            if (!this.currentHorario.titulo) {
+              this.showAlert('El título es obligatorio', 'danger');
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              const response = await axios.post(`${RENDER_API_URL}/api/horarios`, this.currentHorario);
+              
+              // Agregar a la lista local
+              this.horarios.push(response.data);
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Horario agregado correctamente en Render.com', 'success');
+              
+              // Limpiar formulario
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al agregar horario:', error);
+              this.showAlert('Error al agregar el horario en Render.com', 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          editHorario(horario) {
+            // Cargar datos en el formulario
+            this.currentHorario = {...horario};
+            this.editingHorario = horario;
+            this.showForm = true;
+          },
+          
+          // Actualizar horario existente
+          async updateHorario() {
+            if (!this.editingHorario) return;
+            
+            // Validación básica
+            if (!this.currentHorario.titulo) {
+              this.showAlert('El título es obligatorio', 'danger');
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              const response = await axios.put(
+                `${RENDER_API_URL}/api/horarios/${this.editingHorario.id}`, 
+                this.currentHorario
+              );
+              
+              // Actualizar en la lista local
+              const index = this.horarios.findIndex(h => h.id === this.editingHorario.id);
+              if (index !== -1) {
+                this.horarios.splice(index, 1, response.data);
+              }
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Horario actualizado correctamente en Render.com', 'success');
+              
+              // Limpiar formulario
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al actualizar horario:', error);
+              this.showAlert('Error al actualizar el horario en Render.com', 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          // Eliminar horario
+          async deleteHorario(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este horario?')) {
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              await axios.delete(`${RENDER_API_URL}/api/horarios/${id}`);
+              
+              // Eliminar de la lista local
+              this.horarios = this.horarios.filter(h => h.id !== id);
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Horario eliminado correctamente de Render.com', 'success');
+            } catch (error) {
+              console.error('Error al eliminar horario:', error);
+              this.showAlert('Error al eliminar el horario de Render.com', 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          showAlert(message, type) {
+            this.alert = {
+              message: message,
+              type: type
+            };
+            
+            // Ocultar alerta después de 5 segundos
+            setTimeout(() => {
+              this.alert.message = '';
+            }, 5000);
+          },
+          
+          formatDate(dateString) {
+            if (!dateString) return 'No especificada';
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', options);
+          },
+
+          formatDateTime(dateTimeString) {
+            if (!dateTimeString) return 'No disponible';
+            
+            const options = { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            };
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString('es-ES', options);
+          },
+          
+          handleImageError(event) {
+            event.target.style.display = 'none';
+          }
+        }
+      });
+    </script>
+</body>
+</html>

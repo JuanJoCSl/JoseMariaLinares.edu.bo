@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫José María Linares - Blog Admin</title>
+    <link rel="stylesheet" href="../css/adminstyles.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            color: #004080;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 5px;
+            background: linear-gradient(90deg, #004080, #f0ad4e);
+            border-radius: 10px;
+        }
+        
+        .crud-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #004080;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: #004080;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #00264d;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #008040;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #006030;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #f0ad4e;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #ec971f;
+        }
+        
+        .toggle-form-btn {
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .connection-status {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .blog-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .blog-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .blog-card-img {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .blog-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .blog-card:hover .blog-card-img img {
+            transform: scale(1.1);
+        }
+        
+        .blog-card-category {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0ad4e;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card-content h3 {
+            font-size: 1.4rem;
+            color: #004080;
+            margin-bottom: 10px;
+        }
+        
+        .card-content p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .card-actions button {
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #004080;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .config-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .operation-loading {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            .blog-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const referrer = document.referrer;
+        if (!referrer.includes('admin.html')) {
+            window.location.href = '../acceso-denegado.html';
+        }
+    </script>
+    
+    <header>
+        <div class="row"><img src="../img/icono.jpg" width="100px"></div>
+        <div class="rowq">
+            <h1>José María Linares</h1>
+            <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+        </div>
+    </header>
+
+    <main id="app">
+        <h2>📣 Blog Estudiantil - Admin</h2>
+        
+        <div class="config-info">
+            <strong>Configuración Render.com:</strong> 
+            <span v-if="apiConfig.configured">✅ Conectado a: {{ apiConfig.url }}</span>
+            <span v-else>❌ Configura la URL de tu API en Render.com</span>
+        </div>
+        
+        <div class="connection-status" :class="connectionStatusClass">
+            {{ connectionStatusText }}
+        </div>
+        
+        <div v-if="alert.message" :class="['alert', alert.type === 'success' ? 'alert-success' : alert.type === 'warning' ? 'alert-warning' : 'alert-danger']">
+            {{ alert.message }}
+        </div>
+        
+        <button @click="toggleForm" class="btn toggle-form-btn" :class="showForm ? 'btn-secondary' : 'btn-primary'">
+            {{ showForm ? 'Cancelar' : 'Agregar Nueva Entrada de Blog' }}
+        </button>
+        
+        <div v-if="showForm" class="crud-container">
+            <h3>{{ editingPost ? 'Editar Entrada' : 'Nueva Entrada de Blog' }}</h3>
+            
+            <div class="form-group">
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" class="form-control" v-model="currentPost.titulo" placeholder="Ej: ¡Campeones del Torneo!">
+            </div>
+            
+            <div class="form-group">
+                <label for="contenido">Contenido:</label>
+                <textarea id="contenido" class="form-control" v-model="currentPost.contenido" placeholder="Describe la entrada del blog..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="url_imagen">URL de la imagen:</label>
+                <input type="text" id="imagen" class="form-control" v-model="currentPost.imagen" placeholder="Ej: ../img/blog1.jpg">
+                <small>URL de la imagen para esta entrada del blog</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="imagen">Categoría (usar como etiqueta):</label>
+                <input type="text" id="categoria" class="form-control" v-model="currentPost.categoria" placeholder="Ej: Deportes, Ciencia, Música">
+                <small>Nota: Este campo se usa temporalmente como categoría</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha">Fecha de publicación:</label>
+                <input type="date" id="fecha" class="form-control" v-model="currentPost.fecha">
+            </div>
+            
+            <div>
+                <button v-if="editingPost" @click="updatePost" class="btn btn-success" :disabled="operationLoading">
+                    {{ operationLoading ? 'Actualizando...' : 'Actualizar Entrada' }}
+                </button>
+                <button v-else @click="addPost" class="btn btn-primary" :disabled="operationLoading">
+                    {{ operationLoading ? 'Agregando...' : 'Agregar Entrada' }}
+                </button>
+                <button @click="resetForm" class="btn btn-secondary" :disabled="operationLoading">
+                    Limpiar Formulario
+                </button>
+            </div>
+        </div>
+        
+        <div v-if="loading && !showForm" class="loading">
+            <p>Cargando entradas del blog...</p>
+        </div>
+        
+        <div v-else-if="posts.length > 0" class="blog-container">
+            <div v-for="post in posts" :key="post.id" class="blog-card">
+                <div class="blog-card-img">
+                    <img :src="post.imagen || '../img/ejercicio.avif'" :alt="post.titulo" @error="handleImageError">
+                    <div class="blog-card-category">{{ post.categoria || 'General0' }}</div>
+                </div>
+                <div class="card-content">
+                    <h3>{{ post.titulo }}</h3>
+                    <p>{{ post.contenido }}</p>
+                    <p><small><strong>Fecha:</strong> {{ formatDate(post.fecha) }}</small></p>
+                    <div class="card-actions">
+                        <button @click="editPost(post)" class="btn btn-warning" :disabled="operationLoading">Editar</button>
+                        <button @click="deletePost(post.id)" class="btn btn-danger" :disabled="operationLoading">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div v-else class="empty-state">
+            <p>No hay entradas en el blog. ¡Agrega la primera!</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button @click="testConnection" class="btn btn-secondary">
+                Probar Conexión con Render.com
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    
+    <script>
+      const RENDER_API_URL = 'http://127.0.0.1:5000';
+      
+      new Vue({
+        el: '#app',
+        data: {
+          showForm: false,
+          editingPost: null,
+          loading: false,
+          operationLoading: false,
+          connectionStatus: 'checking',
+          alert: { message: '', type: 'success' },
+          apiConfig: {
+            url: RENDER_API_URL,
+            configured: RENDER_API_URL !== 'https://tu-api-comunicados.onrender.com'
+          },
+          currentPost: {
+              titulo: '',
+              contenido: '',
+              categoria: '',
+              imagen: '',  // Este se mantiene como categoría
+              fecha: new Date().toISOString().split('T')[0]
+          },
+          posts: []
+        },
+        computed: {
+          connectionStatusClass() {
+            return {
+              'status-connected': this.connectionStatus === 'connected',
+              'status-disconnected': this.connectionStatus === 'error',
+              'status-loading': this.connectionStatus === 'checking'
+            };
+          },
+          connectionStatusText() {
+            switch(this.connectionStatus) {
+              case 'connected': return '✅ Conectado a Render.com';
+              case 'error': return '❌ Error de conexión con Render.com';
+              case 'checking': return '🔄 Verificando conexión...';
+              default: return 'Estado desconocido';
+            }
+          }
+        },
+        mounted() {
+          this.checkConnection();
+          this.fetchPosts();
+        },
+        methods: {
+          async checkConnection() {
+            this.connectionStatus = 'checking';
+            try {
+              const response = await axios.get(`${RENDER_API_URL}/health`, { timeout: 5000 });
+              this.connectionStatus = response.status === 200 ? 'connected' : 'error';
+            } catch (error) {
+              console.error('Error de conexión:', error);
+              this.connectionStatus = 'error';
+            }
+          },
+          
+          async testConnection() {
+            await this.checkConnection();
+            if (this.connectionStatus === 'connected') {
+              this.showAlert('✅ Conexión exitosa con Render.com', 'success');
+            } else {
+              this.showAlert('❌ No se pudo conectar. Verifica la URL y que el servicio esté activo.', 'danger');
+            }
+          },
+          
+          async fetchPosts() {
+            this.loading = true;
+            try {
+              // Verificar health primero
+              await axios.get(`${RENDER_API_URL}/health`, { timeout: 5000 });
+              
+              const response = await axios.get(`${RENDER_API_URL}/api/blog`);
+              if (response.data && Array.isArray(response.data)) {
+                this.posts = response.data;
+                this.showAlert(`${response.data.length} entradas cargadas desde Render.com`, 'success');
+              } else {
+                throw new Error('Formato de respuesta inválido');
+              }
+            } catch (error) {
+              console.error('Error al cargar posts:', error);
+              let errorMessage = 'Error al cargar las entradas';
+              
+              if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor está tardando en responder';
+              } else if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} ${error.response.statusText}`;
+              } else if (error.request) {
+                errorMessage = 'No se pudo conectar con el servidor';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+              this.loadExampleData();
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          loadExampleData() {
+            this.posts = [
+              {
+                id: 1,
+                titulo: '¡Campeones del Torneo!',
+                contenido: 'Resumen de la emocionante final de fútbol sala donde nuestros estudiantes demostraron su talento y dedicación.',
+                categoria: 'Deportes',
+                imagen: 'https://res.cloudinary.com/dmykvavw7/image/upload/v1761054908/musica_uihbj6.avif',
+                fecha: '2025-10-15',
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                titulo: 'Nuevo Laboratorio de Ciencias',
+                contenido: 'Inauguramos nuestro moderno laboratorio de ciencias equipado con tecnología de última generación.',
+                categoria: 'Deportes',
+                imagen: '../img/ciencia.avif',
+                fecha: '2025-10-10',
+                created_at: new Date().toISOString()
+              }
+            ];
+            this.showAlert('Usando datos de ejemplo - Verifica la conexión con el servidor', 'warning');
+          },
+          
+          toggleForm() {
+            this.showForm = !this.showForm;
+            if (!this.showForm) this.resetForm();
+          },
+          
+          resetForm() {
+            this.currentPost = {
+              titulo: '',
+              contenido: '',
+              categoria: '',
+              imagen: '',
+              fecha: new Date().toISOString().split('T')[0]
+            };
+            this.editingPost = null;
+          },
+          handleImageError(event) {
+              event.target.src = '../img/ejercicio.avif'; // Imagen por defecto
+          },
+          async addPost() {
+            if (!this.currentPost.titulo || !this.currentPost.contenido || !this.currentPost.categoria) {
+              this.showAlert('El título, contenido y categoria son obligatorios', 'danger');
+              return;
+            }
+            
+            if (!this.currentPost.fecha) {
+              this.showAlert('La fecha es obligatoria', 'danger');
+              return;
+            }
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/blog
+              const response = await axios.post(`${RENDER_API_URL}/api/blog`, this.currentPost);
+              this.posts.push(response.data);
+              this.showAlert('Entrada agregada correctamente en Render.com', 'success');
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al agregar post:', error);
+              let errorMessage = 'Error al agregar la entrada';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          editPost(post) {
+            this.currentPost = {...post};
+            this.editingPost = post;
+            this.showForm = true;
+          },
+          
+          async updatePost() {
+            if (!this.editingPost) return;
+            
+            if (!this.currentPost.titulo || !this.currentPost.contenido) {
+              this.showAlert('El título y contenido son obligatorios', 'danger');
+              return;
+            }
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/blog
+              const response = await axios.put(
+                `${RENDER_API_URL}/api/blog/${this.editingPost.id}`,
+                this.currentPost
+              );
+              
+              const index = this.posts.findIndex(p => p.id === this.editingPost.id);
+              if (index !== -1) {
+                this.posts.splice(index, 1, response.data);
+              }
+              
+              this.showAlert('Entrada actualizada correctamente en Render.com', 'success');
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al actualizar post:', error);
+              let errorMessage = 'Error al actualizar la entrada';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          async deletePost(id) {
+            if (!confirm('¿Está seguro de eliminar esta entrada?')) return;
+            
+            this.operationLoading = true;
+            try {
+              // CORREGIDO: Usar endpoint correcto /api/blog
+              await axios.delete(`${RENDER_API_URL}/api/blog/${id}`);
+              this.posts = this.posts.filter(p => p.id !== id);
+              this.showAlert('Entrada eliminada correctamente de Render.com', 'success');
+            } catch (error) {
+              console.error('Error al eliminar post:', error);
+              let errorMessage = 'Error al eliminar la entrada';
+              
+              if (error.response) {
+                errorMessage = `Error del servidor: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.operationLoading = false;
+            }
+          },
+          
+          showAlert(message, type) {
+            this.alert = { message, type };
+            setTimeout(() => { this.alert.message = ''; }, 5000);
+          },
+          
+          formatDate(dateString) {
+            if (!dateString) return 'No especificada';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+          }
+        }
+      });
+    </script>
+</body>
+</html>
