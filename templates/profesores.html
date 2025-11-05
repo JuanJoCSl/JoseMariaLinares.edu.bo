@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏫José María Linares</title>
+    <title>🏫 José María Linares - Equipo Docente</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue.js y Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         main {
             max-width: 1000px;
@@ -57,6 +60,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 25px;
+            margin-bottom: 40px;
         }
         
         .staff-card {
@@ -68,6 +72,14 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .staff-card.loaded {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
         
         .staff-card:hover {
@@ -90,17 +102,18 @@
             border: 5px solid rgba(255, 255, 255, 0.3);
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
         }
         
-        .staff-photo {
+        .staff-photo-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .staff-card:hover .staff-photo {
-            transform: scale(1.1);
         }
         
         .staff-name {
@@ -172,21 +185,78 @@
             color: #004080;
             border-left: 4px solid #004080;
         }
-        
-        .department-icon {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            background: #f0ad4e;
-            color: white;
-            border-radius: 50%;
+
+        /* Estados de carga y error */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #004080;
+            font-size: 1.2rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .error {
+            text-align: center;
+            padding: 30px;
+            background: #ffe6e6;
+            border-radius: 10px;
+            color: #d9534f;
+            border-left: 4px solid #d9534f;
+            margin: 20px 0;
+        }
+
+        .api-status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #e6ffe6;
+            color: #2d8515;
+            border-left: 4px solid #2d8515;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #856404;
+        }
+
+        /* Botón de WhatsApp */
+        .whatsapp-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .whatsapp-button:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .whatsapp-button i {
+            margin-right: 8px;
+            font-size: 1.1rem;
         }
         
         /* Responsive */
@@ -206,179 +276,502 @@
     </style>
 </head>
 <body>
-    <header>
-	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
-	<div class="rowq">
-        <h1>José María Linares</h1>
-        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
-	</div>
-    </header>
-<main>
-    <h2>🧑‍🏫 Conoce a Nuestro Valioso Equipo Docente</h2>
-
-        <h3 class="section-title"><i class="fas fa-user-tie"></i> Dirección de la Unidad Educativa</h3>
-        <div class="staff-container">
-            <div class="staff-card">
-                <div class="staff-header">
-                    <div class="staff-photo-container">
-                        <img src="../img/direc.avif" alt="Foto del Director Silviano Aucachi" class="staff-photo">
-                    </div>
-                    <h3 class="staff-name">Director Silviano Aucachi</h3>
-                    <p class="staff-position">Director General</p>
-                </div>
-                <div class="staff-info">
-                    <div class="staff-detail">
-                        <i class="fas fa-briefcase"></i>
-                        <div class="staff-detail-content">
-                            <p>Cargo: <strong>Director General</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-phone"></i>
-                        <div class="staff-detail-content">
-                            <p>Número de Teléfono: <strong>(123) 456-7890</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-envelope"></i>
-                        <div class="staff-detail-content">
-                            <p>Email: <strong>director@jmlinares.edu</strong></p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Contenedor principal para Vue -->
+    <div id="app">
+        <header>
+            <div class="row"><img src="../img/icono.jpg" width="100px" ></div>
+            <div class="rowq">
+                <h1>José María Linares</h1>
+                <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
             </div>
-        </div>
+        </header>
         
-        <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Comunicación y Lenguaje</h3>
-        <div class="staff-container">
-            <div class="staff-card">
-                <div class="department-icon">
-                    <i class="fas fa-book"></i>
-                </div>
-                <div class="staff-header">
-                    <div class="staff-photo-container">
-                        <img src="../img/adolia.avif" alt="Foto de la Prof. Adolia Pinto" class="staff-photo">
-                    </div>
-                    <h3 class="staff-name">Prof. Adolia Pinto</h3>
-                    <p class="staff-position">Lengua Castellana y Literatura</p>
-                </div>
-                <div class="staff-info">
-                    <div class="staff-detail">
-                        <i class="fas fa-graduation-cap"></i>
-                        <div class="staff-detail-content">
-                            <p>Especialidad: <strong>Lengua Castellana y Literatura</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-phone"></i>
-                        <div class="staff-detail-content">
-                            <p>Número de Teléfono: <strong>(123) 456-7891</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-envelope"></i>
-                        <div class="staff-detail-content">
-                            <p>Email: <strong>apinto@jmlinares.edu</strong></p>
-                        </div>
-                    </div>
-                </div>
+        <main>
+            <h2>🧑‍🏫 Conoce a Nuestro Valioso Equipo Docente</h2>
+
+            <div class="api-status" :class="apiStatusClass">{{ apiStatus }}</div>
+
+            <div v-if="loading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Cargando información del equipo docente...
             </div>
 
-            <div class="staff-card">
-                <div class="department-icon">
-                    <i class="fas fa-language"></i>
-                </div>
-                <div class="staff-header">
-                    <div class="staff-photo-container">
-                        <img src="../img/blanca.avif" alt="Foto de la Prof. Blanca" class="staff-photo">
-                    </div>
-                    <h3 class="staff-name">Prof. Blanca [Apellido]</h3>
-                    <p class="staff-position">Idioma Extranjero (Inglés)</p>
-                </div>
-                <div class="staff-info">
-                    <div class="staff-detail">
-                        <i class="fas fa-graduation-cap"></i>
-                        <div class="staff-detail-content">
-                            <p>Especialidad: <strong>Idioma Extranjero (Inglés)</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-phone"></i>
-                        <div class="staff-detail-content">
-                            <p>Número de Teléfono: <strong>(123) 456-7892</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-envelope"></i>
-                        <div class="staff-detail-content">
-                            <p>Email: <strong>blanca@jmlinares.edu</strong></p>
-                        </div>
-                    </div>
-                </div>
+            <div v-else-if="error" class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>{{ error }}</p>
+                <p>Mostrando datos de ejemplo...</p>
             </div>
-            
-            <div class="staff-card">
-                <div class="department-icon">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <div class="staff-header">
-                    <div class="staff-photo-container">
-                        <img src="../img/tania.avif" alt="Foto de la Prof. Tania" class="staff-photo">
-                    </div>
-                    <h3 class="staff-name">Prof. Tania [Apellido]</h3>
-                    <p class="staff-position">Comunicación y Lenguaje</p>
-                </div>
-                <div class="staff-info">
-                    <div class="staff-detail">
-                        <i class="fas fa-graduation-cap"></i>
-                        <div class="staff-detail-content">
-                            <p>Especialidad: <strong>Comunicación y Lenguaje</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-phone"></i>
-                        <div class="staff-detail-content">
-                            <p>Número de Teléfono: <strong>(123) 456-7893</strong></p>
-                        </div>
-                    </div>
-                    <div class="staff-detail">
-                        <i class="fas fa-envelope"></i>
-                        <div class="staff-detail-content">
-                            <p>Email: <strong>tania@jmlinares.edu</strong></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="contact-note">
-            <i class="fas fa-info-circle"></i> Para ver la lista completa de docentes, por favor, contacte a la secretaría.
-        </div>
-    </main>
 
-    <footer>
-        <p>&copy; 2025 Unidad Educativa José María Linares</p>
-    </footer>
+            <template v-else>
+                <!-- Dirección -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Dirección').length > 0">
+                    <i class="fas fa-user-tie"></i> Dirección de la Unidad Educativa
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Dirección').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Dirección')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.cargo }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-briefcase"></i>
+                                <div class="staff-detail-content">
+                                    <p>Cargo: <strong>{{ profesor.cargo }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comunicación y Lenguaje -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Comunicación y Lenguaje').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Comunicación y Lenguaje
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Comunicación y Lenguaje').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Comunicación y Lenguaje')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i :class="getAreaIcon(profesor.area)"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ciencias Sociales -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Ciencias Sociales').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Ciencias Sociales
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Ciencias Sociales').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Ciencias Sociales')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matemáticas -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Matemáticas').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Matemáticas
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Matemáticas').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Matemáticas')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biología y Ciencias Naturales -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Biología y Ciencias Naturales').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Biología y Ciencias Naturales
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Biología y Ciencias Naturales').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Biología y Ciencias Naturales')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-dna"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lengua Extranjera -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Lengua Extranjera').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Lengua Extranjera (Inglés)
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Lengua Extranjera').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Lengua Extranjera')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Psicología y Filosofía -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Psicología y Filosofía').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Psicología y Filosofía
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Psicología y Filosofía').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Psicología y Filosofía')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Música -->
+                <h3 class="section-title" v-if="getProfesoresByArea('Técnica').length > 0">
+                    <i class="fas fa-chalkboard-teacher"></i> Maestros del Área de Técnica
+                </h3>
+                <div class="staff-container" v-if="getProfesoresByArea('Técnica').length > 0">
+                    <div class="staff-card" 
+                         v-for="profesor in getProfesoresByArea('Técnica')" 
+                         :key="profesor.id"
+                         :class="{ 'loaded': true }">
+                        <div class="department-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div class="staff-header">
+                            <div class="staff-photo-container">
+                                <img v-if="profesor.url_foto" :src="profesor.url_foto" :alt="profesor.nombre" @error="handleImageError">
+                                <i v-else class="fas fa-user"></i>
+                            </div>
+                            <h3 class="staff-name">{{ profesor.nombre }}</h3>
+                            <p class="staff-position">{{ profesor.especialidad }}</p>
+                        </div>
+                        <div class="staff-info">
+                            <div class="staff-detail">
+                                <i class="fas fa-graduation-cap"></i>
+                                <div class="staff-detail-content">
+                                    <p>Especialidad: <strong>{{ profesor.especialidad }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="staff-detail">
+                                <i class="fas fa-phone"></i>
+                                <div class="staff-detail-content">
+                                    <p>Número de Teléfono: <strong>{{ profesor.numero_celular }}</strong></p>
+                                </div>
+                            </div>
+                            <button class="whatsapp-button" @click="openWhatsApp(profesor)">
+                                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-note">
+                    <i class="fas fa-info-circle"></i> Para ver la lista completa de docentes, por favor, contacte a la secretaría.
+                </div>
+            </template>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Unidad Educativa José María Linares</p>
+        </footer>
+    </div>
+
     <script>
-        // Añadir efecto de aparición suave al hacer scroll
-        document.addEventListener('DOMContentLoaded', function() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
+        const API_BASE_URL = 'http://127.0.0.1:5000';
+        //const API_BASE_URL = 'http://10.177.147.173:5000';
+        
+        new Vue({
+            el: '#app',
+            data: {
+                loading: true,
+                error: null,
+                apiStatus: '',
+                profesores: []
+            },
+            computed: {
+                apiStatusClass() {
+                    if (this.apiStatus.includes('éxito') || this.apiStatus.includes('cargad')) {
+                        return 'status-success';
                     }
-                });
-            }, { threshold: 0.1 });
-            
-            // Configurar elementos para animación
-            const animatedElements = document.querySelectorAll('.staff-card');
-            animatedElements.forEach(el => {
-                el.style.opacity = 0;
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                observer.observe(el);
-            });
+                    return 'status-warning';
+                }
+            },
+            mounted() {
+                this.fetchProfesores();
+                setInterval(() => {
+                    if (!this.loading) this.fetchProfesores();
+                }, 300000);
+            },
+            methods: {
+                async fetchProfesores() {
+                    this.loading = true;
+                    this.error = null;
+                    
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/api/profesores`, { timeout: 15000 });
+                        
+                        if (response.data && Array.isArray(response.data)) {
+                            this.profesores = response.data;
+                            this.apiStatus = `✅ ${response.data.length} profesores cargados exitosamente`;
+                        } else {
+                            throw new Error('Formato de respuesta inválido');
+                        }
+                        
+                    } catch (apiError) {
+                        console.error('Error al cargar profesores:', apiError);
+                        
+                        if (apiError.code === 'ECONNABORTED') {
+                            this.error = "Tiempo agotado. El servidor puede estar iniciando.";
+                            this.apiStatus = '⏰ Timeout - Mostrando datos de ejemplo';
+                        } else if (apiError.response) {
+                            this.error = `Error del servidor: ${apiError.response.status}`;
+                            this.apiStatus = `❌ Error ${apiError.response.status} - Mostrando datos de ejemplo`;
+                        } else if (apiError.request) {
+                            this.error = "No se pudo conectar con el servidor.";
+                            this.apiStatus = '🌐 Error de Red - Mostrando datos de ejemplo';
+                        } else {
+                            this.error = "Error inesperado.";
+                            this.apiStatus = '⚙️ Error - Mostrando datos de ejemplo';
+                        }
+                        
+                        this.loadExampleData();
+                        
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                getProfesoresByArea(area) {
+                    return this.profesores.filter(profesor => profesor.area === area);
+                },
+
+                getAreaIcon(area) {
+                    const iconMap = {
+                        'Comunicación y Lenguaje': 'fas fa-book',
+                        'Ciencias Sociales': 'fas fa-globe-americas',
+                        'Matemáticas': 'fas fa-calculator',
+                        'Biología y Ciencias Naturales': 'fas fa-dna',
+                        'Lengua Extranjera': 'fas fa-language',
+                        'Psicología y Filosofía': 'fas fa-brain',
+                        'Técnica': 'fas fa-music'
+                    };
+                    return iconMap[area] || 'fas fa-user';
+                },
+
+                handleImageError(event) {
+                    console.warn('Error cargando imagen:', event.target.src);
+                    event.target.style.display = 'none';
+                },
+
+                // Método para abrir WhatsApp
+                openWhatsApp(profesor) {
+                    // Limpiar el número de teléfono (eliminar paréntesis, espacios y guiones)
+                    const numeroLimpio = profesor.numero_celular.replace(/[^\d]/g, '');
+                    
+                    // Crear mensaje predeterminado
+                    const mensaje = `Hola ${profesor.nombre}, me contacto desde la página web del colegio José María Linares.`;
+                    
+                    // Codificar el mensaje para URL
+                    const mensajeCodificado = encodeURIComponent(mensaje);
+                    
+                    // Crear URL de WhatsApp
+                    const urlWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeCodificado}`;
+                    
+                    // Abrir en una nueva pestaña
+                    window.open(urlWhatsApp, '_blank');
+                },
+
+                loadExampleData() {
+                    // Datos de ejemplo basados en el HTML original
+                    this.profesores = [
+                        // Dirección
+                        {
+                            id: 1,
+                            nombre: 'Director Silverio Aucachi',
+                            cargo: 'Director General',
+                            area: 'Dirección',
+                            especialidad: 'Dirección General',
+                            numero_celular: '(591) 7243-8903',
+                            url_foto: ''
+                        },
+                        // Comunicación y Lenguaje
+                        {
+                            id: 2,
+                            nombre: 'Prof. Fidelia Pinto',
+                            cargo: 'Docente',
+                            area: 'Comunicación y Lenguaje',
+                            especialidad: 'Lengua Castellana y Literatura',
+                            numero_celular: '(591) 7182-4559',
+                            url_foto: ''
+                        },
+                        {
+                            id: 3,
+                            nombre: 'Prof. Blanca',
+                            cargo: 'Docente',
+                            area: 'Comunicación y Lenguaje',
+                            especialidad: 'Comunicación y Lenguaje',
+                            numero_celular: '(591) 7386-2721',
+                            url_foto: ''
+                        },
+                        // ... resto de datos de ejemplo
+                    ];
+                }
+            }
         });
     </script>
 </body>

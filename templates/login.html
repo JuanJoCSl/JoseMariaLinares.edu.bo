@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏫 José María Linares - Iniciar Sesión</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Incluir Vue.js y Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -175,6 +178,13 @@
             transform: translateY(0);
         }
         
+        .login-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .separator {
             text-align: center;
             margin: 25px 0;
@@ -258,12 +268,78 @@
             box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
         }
         
-        /* Mensajes de error */
+        /* Mensajes de error y estado */
         .error-message {
             color: #e74c3c;
             font-size: 0.85rem;
             margin-top: 5px;
             display: none;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .connection-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-checking {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
         
         /* Animaciones */
@@ -299,149 +375,290 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="row"><img src="../img/icono.jpg" width="100px" alt="Logo José María Linares"></div>
-        <div class="rowq">
-            <h1>José María Linares</h1>
-            <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
-        </div>
-    </header>
-    
-    <main>
-        <div class="login-container">
-            <div class="login-header">
-                <h2>Iniciar Sesión</h2>
-                <p>Acceda a su cuenta para continuar</p>
+    <div id="app">
+        <header>
+            <div class="row"><img src="../img/icono.jpg" width="100px" alt="Logo José María Linares"></div>
+            <div class="rowq">
+                <h1>José María Linares</h1>
+                <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
             </div>
-            
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label for="username">Usuario</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" placeholder="Ingrese su usuario" required>
-                    </div>
-                    <div class="error-message" id="usernameError">Por favor ingrese un usuario válido</div>
+        </header>
+        
+        <main>
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Iniciar Sesión</h2>
+                    <p>Acceda a su cuenta para continuar</p>
                 </div>
                 
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                <div class="login-form">
+                    <!-- Estado de conexión -->
+                    <div :class="['connection-status', connectionStatusClass]">
+                        {{ connectionStatusText }}
                     </div>
-                    <div class="error-message" id="passwordError">La contraseña debe tener al menos 6 caracteres</div>
-                </div>
-                
-                <div class="options">
-                    <div class="remember">
-                        <input type="checkbox" id="remember">
-                        <label for="remember">Recordarme</label>
+                    
+                    <!-- Alertas -->
+                    <div v-if="alert.message" :class="['alert', `alert-${alert.type}`]">
+                        {{ alert.message }}
                     </div>
-                    <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
+                    
+                    <form @submit.prevent="handleLogin">
+                        <div class="form-group">
+                            <label for="username">Usuario</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                <input 
+                                    type="text" 
+                                    id="username" 
+                                    v-model="loginData.username"
+                                    placeholder="Ingrese su usuario" 
+                                    required
+                                    :disabled="loading"
+                                >
+                            </div>
+                            <div class="error-message" v-if="errors.username">{{ errors.username }}</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-lock"></i>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    v-model="loginData.password"
+                                    placeholder="Ingrese su contraseña" 
+                                    required
+                                    :disabled="loading"
+                                >
+                            </div>
+                            <div class="error-message" v-if="errors.password">{{ errors.password }}</div>
+                        </div>
+                        
+                        <div class="options">
+                            <div class="remember">
+                                <input type="checkbox" id="remember" v-model="loginData.remember">
+                                <label for="remember">Recordarme</label>
+                            </div>
+                            <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">¿Olvidó su contraseña?</a>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="login-button"
+                            :disabled="loading || connectionStatus !== 'connected'"
+                        >
+                            <span v-if="loading" class="loading"></span>
+                            {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+                        </button>
+                        
+                        <div class="separator">
+                            <span>O ingrese con</span>
+                        </div>
+                        
+                        <div class="alternative-login">
+                            <div class="social-login google" @click="handleSocialLogin('google')">
+                                <i class="fab fa-google"></i>
+                            </div>
+                            <div class="social-login facebook" @click="handleSocialLogin('facebook')">
+                                <i class="fab fa-facebook-f"></i>
+                            </div>
+                            <div class="social-login microsoft" @click="handleSocialLogin('microsoft')">
+                                <i class="fab fa-microsoft"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="register">
+                            ¿No tiene una cuenta? <a href="#" @click.prevent="handleRegister">Regístrese aquí</a>
+                        </div>
+                    </form>
                 </div>
-                
-                <button type="submit" class="login-button">Iniciar Sesión</button>
-                
-                <div class="separator">
-                    <span>O ingrese con</span>
-                </div>
-                
-                <div class="alternative-login">
-                    <div class="social-login google">
-                        <i class="fab fa-google"></i>
-                    </div>
-                    <div class="social-login facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </div>
-                    <div class="social-login microsoft">
-                        <i class="fab fa-microsoft"></i>
-                    </div>
-                </div>
-                
-                <div class="register">
-                    ¿No tiene una cuenta? <a href="#">Regístrese aquí</a>
-                </div>
-            </form>
-        </div>
-    </main>
-    
-    <footer>
-        <p>&copy; 2025 Unidad Educativa José María Linares</p>
-    </footer>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 Unidad Educativa José María Linares</p>
+        </footer>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const usernameError = document.getElementById('usernameError');
-            const passwordError = document.getElementById('passwordError');
-            
-            // Validación del formulario
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                let isValid = true;
+        // URL de la API - cambiar según sea necesario
+        const API_URL = 'http://127.0.0.1:5000';
+        
+        new Vue({
+            el: '#app',
+            data: {
+                loginData: {
+                    username: '',
+                    password: '',
+                    remember: false
+                },
+                errors: {
+                    username: '',
+                    password: ''
+                },
+                loading: false,
+                connectionStatus: 'checking', // 'checking', 'connected', 'error'
+                alert: {
+                    message: '',
+                    type: 'success'
+                }
+            },
+            computed: {
+                connectionStatusClass() {
+                    return {
+                        'status-connected': this.connectionStatus === 'connected',
+                        'status-error': this.connectionStatus === 'error',
+                        'status-checking': this.connectionStatus === 'checking'
+                    };
+                },
+                connectionStatusText() {
+                    switch(this.connectionStatus) {
+                        case 'connected': return '✅ Conectado al servidor';
+                        case 'error': return '❌ Error de conexión con el servidor';
+                        case 'checking': return '🔄 Verificando conexión...';
+                        default: return 'Estado desconocido';
+                    }
+                }
+            },
+            mounted() {
+                this.checkConnection();
+                // Cargar credenciales guardadas si existen
+                this.loadSavedCredentials();
+            },
+            methods: {
+                async checkConnection() {
+                    this.connectionStatus = 'checking';
+                    try {
+                        const response = await axios.get(`${API_URL}/health`, { timeout: 5000 });
+                        this.connectionStatus = response.status === 200 ? 'connected' : 'error';
+                    } catch (error) {
+                        console.error('Error de conexión:', error);
+                        this.connectionStatus = 'error';
+                        this.showAlert('No se pudo conectar con el servidor. Verifica que esté ejecutándose en http://127.0.0.1:5000', 'danger');
+                    }
+                },
                 
-                // Validar usuario
-                if (usernameInput.value.trim() === '') {
-                    usernameError.style.display = 'block';
-                    isValid = false;
-                } else {
-                    usernameError.style.display = 'none';
-                }
+                validateForm() {
+                    this.errors = { username: '', password: '' };
+                    let isValid = true;
+                    
+                    if (!this.loginData.username.trim()) {
+                        this.errors.username = 'Por favor ingrese un usuario válido';
+                        isValid = false;
+                    }
+                    
+                    if (!this.loginData.password) {
+                        this.errors.password = 'La contraseña es obligatoria';
+                        isValid = false;
+                    } else if (this.loginData.password.length < 6) {
+                        this.errors.password = 'La contraseña debe tener al menos 6 caracteres';
+                        isValid = false;
+                    }
+                    
+                    return isValid;
+                },
                 
-                // Validar contraseña
-                if (passwordInput.value.length < 6) {
-                    passwordError.style.display = 'block';
-                    isValid = false;
-                } else {
-                    passwordError.style.display = 'none';
-                }
+                async handleLogin() {
+                    if (!this.validateForm()) return;
+                    
+                    this.loading = true;
+                    this.clearAlert();
+                    
+                    try {
+                        // NOTA: Necesitarás crear un endpoint /api/login en tu backend Flask
+                        // Por ahora, simularemos la autenticación verificando contra la tabla usuarios
+                        const response = await axios.post(`${API_URL}/api/login`, this.loginData);
+                        
+                        if (response.data.success) {
+                            this.showAlert('¡Inicio de sesión exitoso! Bienvenido a José María Linares', 'success');
+                            
+                            // Guardar credenciales si se seleccionó "Recordarme"
+                            if (this.loginData.remember) {
+                                this.saveCredentials();
+                            } else {
+                                this.clearSavedCredentials();
+                            }
+                            
+                            // Redirigir después de un breve delay
+                            setTimeout(() => {
+                                window.location.href = 'admin.html';
+                            }, 1500);
+                            localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+                            
+                        } else {
+                            this.showAlert(response.data.message || 'Credenciales incorrectas', 'danger');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error en login:', error);
+                        let errorMessage = 'Error al iniciar sesión';
+                        
+                        if (error.response) {
+                            // El servidor respondió con un error
+                            if (error.response.status === 401) {
+                                errorMessage = 'Usuario o contraseña incorrectos';
+                            } else if (error.response.status === 404) {
+                                errorMessage = 'Endpoint de login no encontrado. Verifica tu backend.';
+                            } else {
+                                errorMessage = `Error del servidor: ${error.response.status}`;
+                            }
+                        } else if (error.code === 'ECONNABORTED') {
+                            errorMessage = 'Timeout: El servidor no respondió a tiempo';
+                        } else if (error.request) {
+                            errorMessage = 'No se pudo conectar con el servidor';
+                        }
+                        
+                        this.showAlert(errorMessage, 'danger');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
                 
-                // Si es válido, simular inicio de sesión
-                if (isValid && usernameInput.value === "anais123" && passwordInput.value === "marcasalazar2025") {
-                    // Aquí normalmente enviaríamos los datos al servidor
-                    // Por ahora, solo mostraremos un mensaje de éxito
-                    alert('¡Inicio de sesión exitoso! Bienvenido a José María Linares');
-                    // Redirigir a la página principal después del login
-                    window.location.href = 'admin.html';
+                handleSocialLogin(provider) {
+                    this.showAlert(`Iniciando sesión con ${provider}. Esta función está en desarrollo.`, 'warning');
+                },
+                
+                handleForgotPassword() {
+                    this.showAlert('Se ha enviado un enlace de recuperación a su correo electrónico.', 'warning');
+                },
+                
+                handleRegister() {
+                    this.showAlert('Redirigiendo al formulario de registro. Esta función está en desarrollo.', 'warning');
+                },
+                
+                showAlert(message, type) {
+                    this.alert = { message, type };
+                    // Auto-ocultar después de 5 segundos
+                    setTimeout(() => {
+                        this.clearAlert();
+                    }, 5000);
+                },
+                
+                clearAlert() {
+                    this.alert = { message: '', type: 'success' };
+                },
+                
+                saveCredentials() {
+                    localStorage.setItem('jml_username', this.loginData.username);
+                    localStorage.setItem('jml_remember', 'true');
+                },
+                
+                loadSavedCredentials() {
+                    const savedUsername = localStorage.getItem('jml_username');
+                    const remember = localStorage.getItem('jml_remember') === 'true';
+                    
+                    if (remember && savedUsername) {
+                        this.loginData.username = savedUsername;
+                        this.loginData.remember = true;
+                    }
+                },
+                
+                clearSavedCredentials() {
+                    localStorage.removeItem('jml_username');
+                    localStorage.removeItem('jml_remember');
                 }
-            });
-            
-            // Limpiar errores al escribir
-            usernameInput.addEventListener('input', function() {
-                if (usernameInput.value.trim() !== '') {
-                    usernameError.style.display = 'none';
-                }
-            });
-            
-            passwordInput.addEventListener('input', function() {
-                if (passwordInput.value.length >= 6) {
-                    passwordError.style.display = 'none';
-                }
-            });
-            
-            // Simular inicio de sesión con redes sociales
-            document.querySelectorAll('.social-login').forEach(button => {
-                button.addEventListener('click', function() {
-                    const provider = this.classList.contains('google') ? 'Google' : 
-                                    this.classList.contains('facebook') ? 'Facebook' : 'Microsoft';
-                    alert(`Iniciando sesión con ${provider}. Esta función está en desarrollo.`);
-                });
-            });
-            
-            // Simular recuperación de contraseña
-            document.querySelector('.forgot-password').addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Se ha enviado un enlace de recuperación a su correo electrónico.');
-            });
-            
-            // Simular registro
-            document.querySelector('.register a').addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Redirigiendo al formulario de registro. Esta función está en desarrollo.');
-            });
+            }
         });
     </script>
 </body>

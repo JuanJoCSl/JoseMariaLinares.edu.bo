@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏫 José María Linares - Administrar Usuarios</title>
+    <link rel="stylesheet" href="../css/adminstyles.css">
+    <!-- Vue.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- Axios CDN para peticiones HTTP -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+    main {
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #004080;
+    }
+
+    .usuario-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-left: 6px solid #008040;
+      transition: transform 0.2s ease;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .usuario-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    /* Estilos para el formulario de CRUD */
+    .crud-container {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #004080;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-right: 10px;
+    }
+    
+    .btn-primary {
+      background: #004080;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #00264d;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    
+    .btn-success {
+      background: #008040;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #006030;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .btn-warning {
+      background: #f0ad4e;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #ec971f;
+    }
+    
+    .usuario-actions {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .usuario-actions button {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .toggle-form-btn {
+      margin-bottom: 20px;
+      display: block;
+      width: 100%;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+    }
+    
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    
+    .alert-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #004080;
+    }
+    
+    .connection-status {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    .status-connected {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status-disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-loading {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .config-info {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+
+    .password-field {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+    <!-- Script de verificación de acceso -->
+    <script>
+        // Verificar si viene de admin.html
+        const referrer = document.referrer;
+        if (!referrer.includes('admin.html')) {
+            // Redirigir a página de error o login
+            window.location.href = '../acceso-denegado.html';
+        }
+    </script>
+    
+    <header>
+	<div class="row"><img src="../img/icono.jpg" width="100px" ></div>
+	<div class="rowq">
+        <h1>José María Linares</h1>
+        <p class="slogan">Con orden, trabajo y estudio... Adelante Linares</p>
+	</div>
+    </header>
+
+    <main id="app">
+      <h2>👥 Administrar Usuarios</h2>
+      
+      <!-- Información de configuración -->
+      <div class="config-info">
+        <strong>Configuración API:</strong> 
+        <span v-if="apiConfig.configured">✅ Conectado a: {{ apiConfig.url }}</span>
+        <span v-else>❌ Configura la URL de tu API</span>
+      </div>
+      
+      <!-- Estado de conexión -->
+      <div class="connection-status" :class="connectionStatusClass">
+        {{ connectionStatusText }}
+      </div>
+      
+      <!-- Alertas -->
+      <div v-if="alert.message" :class="['alert', alert.type === 'success' ? 'alert-success' : alert.type === 'warning' ? 'alert-warning' : 'alert-danger']">
+        {{ alert.message }}
+      </div>
+      
+      <!-- Botón para mostrar/ocultar formulario -->
+      <button @click="toggleForm" class="btn toggle-form-btn" :class="showForm ? 'btn-secondary' : 'btn-primary'">
+        {{ showForm ? 'Cancelar' : 'Agregar Nuevo Usuario' }}
+      </button>
+      
+      <!-- Formulario para agregar/editar usuarios -->
+      <div v-if="showForm" class="crud-container">
+        <h3>{{ editingUsuario ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+        
+        <div class="form-group">
+          <label for="username">Nombre de usuario:</label>
+          <input type="text" id="username" class="form-control" v-model="currentUsuario.username" placeholder="Ej: juan.perez">
+        </div>
+        
+        <div class="form-group">
+          <label for="nombre">Nombre completo:</label>
+          <input type="text" id="nombre" class="form-control" v-model="currentUsuario.nombre" placeholder="Ej: Juan Pérez">
+        </div>
+        
+        <div class="form-group password-field">
+          <label for="password">Contraseña:</label>
+          <input :type="showPassword ? 'text' : 'password'" id="password" class="form-control" v-model="currentUsuario.password" placeholder="Ingrese la contraseña">
+          <button type="button" class="password-toggle" @click="showPassword = !showPassword">
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
+          <small v-if="editingUsuario" style="color: #666; display: block; margin-top: 5px;">
+            Dejar en blanco para mantener la contraseña actual
+          </small>
+        </div>
+        
+        <div>
+          <button v-if="editingUsuario" @click="updateUsuario" class="btn btn-success" :disabled="loading">
+            {{ loading ? 'Actualizando...' : 'Actualizar Usuario' }}
+          </button>
+          <button v-else @click="addUsuario" class="btn btn-primary" :disabled="loading">
+            {{ loading ? 'Agregando...' : 'Agregar Usuario' }}
+          </button>
+          <button @click="resetForm" class="btn btn-secondary" :disabled="loading">
+            Limpiar Formulario
+          </button>
+        </div>
+      </div>
+      
+      <!-- Lista de usuarios -->
+      <div v-if="loading" class="loading">
+        <p>Cargando usuarios...</p>
+      </div>
+      
+      <div v-else-if="usuarios.length > 0">
+        <div v-for="usuario in usuarios" :key="usuario.id" class="usuario-card">
+          <div class="usuario-actions">
+            <button @click="editUsuario(usuario)" class="btn btn-warning" :disabled="loading">Editar</button>
+            <button @click="deleteUsuario(usuario.id)" class="btn btn-danger" :disabled="loading">Eliminar</button>
+          </div>
+          
+          <h3>{{ usuario.nombre }}</h3>
+          <p><strong>Usuario:</strong> {{ usuario.username }}</p>
+          <p><small><strong>ID:</strong> {{ usuario.id }} | <strong>Creado:</strong> {{ formatDateTime(usuario.created_at) }}</small></p>
+        </div>
+      </div>
+      
+      <!-- Estado vacío -->
+      <div v-else class="empty-state">
+        <p>No hay usuarios disponibles. ¡Agregue el primero!</p>
+      </div>
+
+      <!-- Botón para probar conexión -->
+      <div style="text-align: center; margin-top: 30px;">
+        <button @click="testConnection" class="btn btn-secondary">
+          Probar Conexión con la API
+        </button>
+      </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Unidad Educativa José María Linares</p>
+    </footer>
+    
+    <script>
+      // Configuración para la API - Cambiar según sea necesario
+      const API_URL = 'http://127.0.0.1:5000'; // Para desarrollo local
+      // const API_URL = 'https://josemarialinares-api.onrender.com'; // Para producción
+      
+      new Vue({
+        el: '#app',
+        data: {
+          showForm: false,
+          editingUsuario: null,
+          loading: false,
+          showPassword: false,
+          connectionStatus: 'checking', // checking, connected, error
+          alert: {
+            message: '',
+            type: 'success'
+          },
+          apiConfig: {
+            url: API_URL,
+            configured: API_URL !== 'https://tu-api-comunicados.onrender.com'
+          },
+          currentUsuario: {
+            username: '',
+            nombre: '',
+            password: ''
+          },
+          usuarios: []
+        },
+        computed: {
+          connectionStatusClass() {
+            return {
+              'status-connected': this.connectionStatus === 'connected',
+              'status-disconnected': this.connectionStatus === 'error',
+              'status-loading': this.connectionStatus === 'checking'
+            };
+          },
+          connectionStatusText() {
+            switch(this.connectionStatus) {
+              case 'connected': return '✅ Conectado a la API';
+              case 'error': return '❌ Error de conexión con la API';
+              case 'checking': return '🔄 Verificando conexión...';
+              default: return 'Estado desconocido';
+            }
+          }
+        },
+        mounted() {
+          this.checkConnection();
+          this.fetchUsuarios();
+        },
+        methods: {
+          // Verificar conexión con la API
+          async checkConnection() {
+            this.connectionStatus = 'checking';
+            try {
+              const response = await axios.get(`${API_URL}/health`, { timeout: 5000 });
+              this.connectionStatus = response.status === 200 ? 'connected' : 'error';
+            } catch (error) {
+              console.error('Error de conexión con la API:', error);
+              this.connectionStatus = 'error';
+              if (error.code === 'ECONNABORTED') {
+                this.showAlert('Timeout: El servidor está iniciando (puede tomar 1-2 minutos)', 'warning');
+              }
+            }
+          },
+
+          async testConnection() {
+            await this.checkConnection();
+            if (this.connectionStatus === 'connected') {
+              this.showAlert('✅ Conexión exitosa con la API', 'success');
+            } else {
+              this.showAlert('❌ No se pudo conectar con la API. Verifica la URL y que el servicio esté ejecutándose.', 'danger');
+            }
+          },
+          
+          // Obtener todos los usuarios
+          async fetchUsuarios() {
+            this.loading = true;
+            try {
+              const response = await axios.get(`${API_URL}/api/usuarios`);
+              this.usuarios = response.data;
+              this.showAlert('Usuarios cargados correctamente', 'success');
+            } catch (error) {
+              console.error('Error al cargar usuarios:', error);
+              this.showAlert('Error al cargar los usuarios desde la API', 'danger');
+              // Datos de ejemplo en caso de error
+              this.loadExampleData();
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          // Cargar datos de ejemplo si falla la conexión
+          loadExampleData() {
+            this.usuarios = [
+              {
+                id: 1,
+                username: 'admin',
+                nombre: 'Administrador del Sistema',
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                username: 'juan.perez',
+                nombre: 'Juan Pérez',
+                created_at: new Date().toISOString()
+              }
+            ];
+            this.showAlert('Usando datos de ejemplo - Verifica la conexión con la API', 'warning');
+          },
+          
+          toggleForm() {
+            this.showForm = !this.showForm;
+            if (!this.showForm) {
+              this.resetForm();
+            }
+          },
+          
+          resetForm() {
+            this.currentUsuario = {
+              username: '',
+              nombre: '',
+              password: ''
+            };
+            this.editingUsuario = null;
+            this.showPassword = false;
+          },
+          
+          // Agregar nuevo usuario
+          async addUsuario() {
+            if (!this.currentUsuario.username || !this.currentUsuario.nombre || !this.currentUsuario.password) {
+              this.showAlert('Todos los campos son obligatorios para crear un usuario', 'danger');
+              return;
+            }
+            
+            if (this.currentUsuario.password.length < 6) {
+              this.showAlert('La contraseña debe tener al menos 6 caracteres', 'danger');
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              const response = await axios.post(`${API_URL}/api/usuarios`, this.currentUsuario);
+              
+              // Agregar a la lista local
+              this.usuarios.push(response.data);
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Usuario agregado correctamente', 'success');
+              
+              // Limpiar formulario
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al agregar usuario:', error);
+              let errorMessage = 'Error al agregar el usuario';
+              
+              if (error.response && error.response.data && error.response.data.error) {
+                errorMessage = error.response.data.error;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          editUsuario(usuario) {
+            // Cargar datos en el formulario (sin contraseña)
+            this.currentUsuario = {
+              username: usuario.username,
+              nombre: usuario.nombre,
+              password: '' // No mostramos la contraseña, se deja en blanco para cambiarla
+            };
+            this.editingUsuario = usuario;
+            this.showForm = true;
+          },
+          
+          // Actualizar usuario existente
+          async updateUsuario() {
+            if (!this.editingUsuario) return;
+            
+            // Validación básica
+            if (!this.currentUsuario.username || !this.currentUsuario.nombre) {
+              this.showAlert('El nombre de usuario y el nombre completo son obligatorios', 'danger');
+              return;
+            }
+            
+            // Si se proporciona nueva contraseña, validar longitud
+            if (this.currentUsuario.password && this.currentUsuario.password.length < 6) {
+              this.showAlert('La contraseña debe tener al menos 6 caracteres', 'danger');
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              // Si no se proporciona contraseña, no la enviamos (se mantiene la actual)
+              const dataToUpdate = { ...this.currentUsuario };
+              if (!dataToUpdate.password) {
+                delete dataToUpdate.password;
+              }
+
+              const response = await axios.put(
+                `${API_URL}/api/usuarios/${this.editingUsuario.id}`, 
+                dataToUpdate
+              );
+              
+              // Actualizar en la lista local
+              const index = this.usuarios.findIndex(u => u.id === this.editingUsuario.id);
+              if (index !== -1) {
+                this.usuarios.splice(index, 1, response.data);
+              }
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Usuario actualizado correctamente', 'success');
+              
+              // Limpiar formulario
+              this.resetForm();
+              this.showForm = false;
+            } catch (error) {
+              console.error('Error al actualizar usuario:', error);
+              let errorMessage = 'Error al actualizar el usuario';
+              
+              if (error.response && error.response.data && error.response.data.error) {
+                errorMessage = error.response.data.error;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          // Eliminar usuario
+          async deleteUsuario(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este usuario?')) {
+              return;
+            }
+            
+            // Evitar eliminar el propio usuario si es el admin actual
+            const usuario = this.usuarios.find(u => u.id === id);
+            if (usuario && usuario.username === 'admin') {
+              this.showAlert('No se puede eliminar el usuario administrador principal', 'warning');
+              return;
+            }
+            
+            this.loading = true;
+            try {
+              await axios.delete(`${API_URL}/api/usuarios/${id}`);
+              
+              // Eliminar de la lista local
+              this.usuarios = this.usuarios.filter(u => u.id !== id);
+              
+              // Mostrar mensaje de éxito
+              this.showAlert('Usuario eliminado correctamente', 'success');
+            } catch (error) {
+              console.error('Error al eliminar usuario:', error);
+              let errorMessage = 'Error al eliminar el usuario';
+              
+              if (error.response && error.response.data && error.response.data.error) {
+                errorMessage = error.response.data.error;
+              } else if (error.code === 'ECONNABORTED') {
+                errorMessage = 'Timeout: El servidor no respondió a tiempo';
+              }
+              
+              this.showAlert(errorMessage, 'danger');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          showAlert(message, type) {
+            this.alert = {
+              message: message,
+              type: type
+            };
+            
+            // Ocultar alerta después de 5 segundos
+            setTimeout(() => {
+              this.alert.message = '';
+            }, 5000);
+          },
+          
+          formatDateTime(dateTimeString) {
+            if (!dateTimeString) return 'No disponible';
+            
+            const options = { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            };
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString('es-ES', options);
+          }
+        }
+      });
+    </script>
+</body>
+</html>
